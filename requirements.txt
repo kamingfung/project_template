@@ -1,0 +1,10 @@
+###
+# This file is an automated developer tool to run pip commands, containing global requirements for the project.
+# Please do not put any pipeline, package, or application specific requirements in this file.
+# This file should NOT be used to store package dependencies (use `setup.cfg` instead).
+# For more information see https://pip.pypa.io/en/stable/reference/requirements-file-format/
+###
+
+pre-commit
+black[jupyter]==24.4.0
+gitpython==3.1.43
