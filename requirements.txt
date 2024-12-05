@@ -6,5 +6,5 @@
 ###
 
 pre-commit
-black[jupyter]==24.4.0
+black[jupyter]
 gitpython==3.1.43
