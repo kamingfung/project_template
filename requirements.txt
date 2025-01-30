@@ -8,3 +8,14 @@
 pre-commit
 black[jupyter]
 gitpython==3.1.43
+cartopy
+geopandas
+numpy
+pandas
+rioxarray
+matplotlib
+rasterio
+scipy
+dask
+pyarrow
+xarray-spatial
