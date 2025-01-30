@@ -5,17 +5,17 @@
 # For more information see https://pip.pypa.io/en/stable/reference/requirements-file-format/
 ###
 
-pre-commit
-black[jupyter]
-gitpython==3.1.43
-cartopy
-geopandas
-numpy
-pandas
-rioxarray
-matplotlib
-rasterio
-scipy
-dask
-pyarrow
-xarray-spatial
+pre-commit              # for managing and maintaining multi-language pre-commit hooks
+black[jupyter]          # for formatting Python code, including Jupyter notebooks
+gitpython==3.1.43       # for interacting with Git repositories
+cartopy                 # for cartographic projections and geospatial data visualization
+geopandas               # for working with geospatial data in Python
+numpy                   # for numerical computations
+pandas                  # for data manipulation and analysis
+rioxarray               # for raster data operations using xarray
+matplotlib              # for creating static, animated, and interactive visualizations
+rasterio                # for reading and writing geospatial raster data
+scipy                   # for scientific and technical computing
+dask                    # for parallel computing and handling large datasets
+pyarrow                 # for columnar data processing and interoperability
+xarray-spatial          # for raster-based spatial analysis
