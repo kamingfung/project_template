@@ -57,9 +57,9 @@ flowchart LR
     git clone https://github.com/McK-Private/project_template.git
     ```
 
-2) Create a virtual environment using a package management tools: a) [Miniforge](https://github.com/conda-forge/miniforge) or b) [uv](https://github.com/astral-sh/uv)
+2) Create a virtual environment using a package management tool: a) [Miniforge](https://github.com/conda-forge/miniforge) or b) [uv](https://github.com/astral-sh/uv)
 
-    a) Miniforge (results in a environment named `project_template`, living in `~/miniforge3/envs/project_template`):
+    a) Miniforge (results in an environment named `project_template`, living in `~/miniforge3/envs/project_template`):
 
     1. Install Miniforge
 
@@ -75,7 +75,7 @@ flowchart LR
         #  Please refer to the [Miniforge](https://github.com/conda-forge/miniforge) documentation for installation instructions.
         ```
 
-    2. Create a new environment. In this template, I've named it `project_template` and include a list of geospatial packages as examples. See and adjust `environment.yml` and `requirements.txt` as needed.
+    2. Create a new environment. In this template, I've named it `project_template` and included a list of geospatial packages as examples. See and adjust `environment.yml` and `requirements.txt` as needed.
 
         ```bash
         conda env create -f environment.yml
@@ -94,7 +94,7 @@ flowchart LR
         conda install --channel conda-forge pdal python-pdal --name project_template
         ```
 
-    b) uv (results in a environment named `.venv`, living in the root of the project):
+    b) uv (results in an environment named `.venv`, living in the root of the project):
 
     1. Install uv
 
@@ -108,7 +108,7 @@ flowchart LR
         powershell -ExecutionPolicy ByPass -c "irm <https://astral.sh/uv/install.ps1> | iex"
         ```
 
-    2. Create a new environment. In this template, I've named it `project_template` and include a list of geospatial packages as examples. See and adjust `pyproject.toml` and `requirements.txt` as needed.
+    2. Create a new environment. In this template, I've named it `project_template` and included a list of geospatial packages as examples. See and adjust `pyproject.toml` and `requirements.txt` as needed.
 
         ```bash
         uv add -r requirements.txt
