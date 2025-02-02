@@ -5,9 +5,11 @@
 # For more information see https://pip.pypa.io/en/stable/reference/requirements-file-format/
 ###
 
+pip                     # for installing and managing Python packages
+uv                      # for managing virtual environments
 pre-commit              # for managing and maintaining multi-language pre-commit hooks
 black[jupyter]          # for formatting Python code, including Jupyter notebooks
-gitpython==3.1.43       # for interacting with Git repositories
+gitpython               # for interacting with Git repositories
 cartopy                 # for cartographic projections and geospatial data visualization
 geopandas               # for working with geospatial data in Python
 numpy                   # for numerical computations
@@ -18,4 +20,8 @@ rasterio                # for reading and writing geospatial raster data
 scipy                   # for scientific and technical computing
 dask                    # for parallel computing and handling large datasets
 pyarrow                 # for columnar data processing and interoperability
+llvmlite                # for JIT compilation of numerical functions
+numba                   # for accelerating numerical computations
 xarray-spatial          # for raster-based spatial analysis
+ipykernel               # for running Jupyter kernels in other environments
+
