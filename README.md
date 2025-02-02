@@ -57,34 +57,64 @@ flowchart LR
     git clone https://github.com/McK-Private/project_template.git
     ```
 
-2) Create a virtual environment after installing [Conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) on your machine.
+2) Create a virtual environment using a package management tools: a) [Miniforge](https://github.com/conda-forge/miniforge) or b) [uv](https://github.com/astral-sh/uv)
 
-    From the terminal, run:
+    a) Miniforge (results in a environment named `project_template`, living in `~/miniforge3/envs/project_template`):
 
-    ```bash
-    conda env create -f environment.yml
-    ```
+    1. Install Miniforge
 
-3) Activate the environment. From the terminal, run:
+        ```sh
+        # On macOS and Linux.
+        curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
 
-    ```bash
-    conda activate project_template
-    ```
+        bash Miniforge3-$(uname)-$(uname -m).sh
+        ```
 
-4) (If you use PDAL) Install `pdal` for Python first!
-PDAL Python support is hosted in a separate repository than PDAL itself on GitHub. If you have a working PDAL installation and a working Python installation, you can install the extension using the following procedure on Unix. The procedure on Windows is similar.
+        ```sh
+        # On Windows.
+        #  Please refer to the [Miniforge](https://github.com/conda-forge/miniforge) documentation for installation instructions.
+        ```
 
-    ```bash
-    conda install --channel conda-forge pdal python-pdal --name project_template
-    ```
+    2. Create a new environment. In this template, I've named it `project_template` and include a list of geospatial packages as examples. See and adjust `environment.yml` and `requirements.txt` as needed.
 
-5) Make sure the environment is activated. `(project_template)` should be visible to the left of your terminal command line. Then install all the packages in requirements.txt by invoking:
+        ```bash
+        conda env create -f environment.yml
+        ```
 
-    ```bash
-    pip install -r requirements.txt
-    ```
+    3. Activate the environment. From the terminal, run:
 
-6) Install pre-commit so the repo is automatically formatted to [black](https://ljvmiranda921.github.io/notebook/2018/06/21/precommits-using-black-and-flake8/).
+        ```bash
+        conda activate project_template # project_template is the default name of the environment; change it if you've named it differently
+        ```
+
+    4. (If you use PDAL) Install `pdal` for Python first!
+    PDAL Python support is hosted in a separate repository than PDAL itself on GitHub. If you have a working PDAL installation and a working Python installation, you can install the extension using the following procedure on Unix. The procedure on Windows is similar.
+
+        ```bash
+        conda install --channel conda-forge pdal python-pdal --name project_template
+        ```
+
+    b) uv (results in a environment named `.venv`, living in the root of the project):
+
+    1. Install uv
+
+        ```bash
+        # On macOS and Linux.
+        curl -LsSf <https://astral.sh/uv/install.sh> | sh
+        ```
+
+        ```bash
+        # On Windows.
+        powershell -ExecutionPolicy ByPass -c "irm <https://astral.sh/uv/install.ps1> | iex"
+        ```
+
+    2. Create a new environment. In this template, I've named it `project_template` and include a list of geospatial packages as examples. See and adjust `pyproject.toml` and `requirements.txt` as needed.
+
+        ```bash
+        uv add -r requirements.txt
+        ```
+
+3) Install pre-commit so the repo is automatically formatted to [black](https://ljvmiranda921.github.io/notebook/2018/06/21/precommits-using-black-and-flake8/).
 
     From the terminal, run:
 
