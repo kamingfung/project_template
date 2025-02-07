@@ -111,7 +111,8 @@ flowchart LR
     2. Create a new environment. In this template, I've named it `project_template` and included a list of geospatial packages as examples. See and adjust `pyproject.toml` and `requirements.txt` as needed.
 
         ```bash
-        uv add -r requirements.txt
+        uv add -r requirements.txt # add the requirements
+        uv sync # install the packages
         ```
 
 3) Install pre-commit so the repo is automatically formatted to [black](https://ljvmiranda921.github.io/notebook/2018/06/21/precommits-using-black-and-flake8/).
@@ -121,8 +122,9 @@ flowchart LR
     ```bash
     pre-commit install
 
-    # optional (this will run automatically with each commit)
-    pre-commit run --all-files
+    # optional
+    pre-commit run --all-files # run the pre-commit hooks on all files
+    pre-commit autoupdate # update the pre-commit hooks
     ```
 
 ## Folder Structure
