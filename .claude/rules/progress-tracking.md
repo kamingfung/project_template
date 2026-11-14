@@ -29,7 +29,7 @@ Always in this section order: **Brief → Progress → Decisions**.
 
 <!-- Written at epic creation. Do not edit. -->
 
-**Spec:** `.kiro/specs/<spec-dir>/` ← omit if no spec exists
+**Spec:** `docs/superpowers/specs/<spec-file>.md` ← omit if no spec exists
 **Goal:** <distilled from spec Introduction OR manual motivation>
 **Pass criteria:** <condensed from spec acceptance criteria OR manual pass/fail>
 **Links:** [<TICKET-ID>](url) | PR #NNN
@@ -73,7 +73,7 @@ Status: On track / At risk / Blocked / Done ✓
 | Progress  | Agent (stop hook)               | Every session                        | Yes — update in place |
 | Decisions | Any contributor                 | At each decision point               | Append-only           |
 
-**Populating Brief from a spec:** If a `.kiro/specs/` entry exists for the epic, search for
+**Populating Brief from a spec:** If a `docs/superpowers/specs/` entry exists for the epic, search for
 the spec by grepping for the Jira ticket number in `requirements.md`. Extract the Introduction
 as **Goal** and condense the key acceptance criteria as **Pass criteria**. Add a **Spec**
 pointer. If no spec exists, write manually and mark unknowns with `[TODO]`.
@@ -101,7 +101,7 @@ repo — architecture, platform, tooling, data contracts. Lives at `changelogs/D
 
 ## Agent Behavior
 
-- **Session start:** `.kiro/steering/session-handoff.md` (auto-loaded) — read the epic file
-- **Session end:** `.kiro/hooks/update-progress-on-stop.json` (auto) — updates `## Progress`,
+- **Session start:** `.claude/rules/session-handoff.md` (auto-loaded) — read the epic file
+- **Session end:** Update `## Progress` before ending the session.
   scaffolds a new epic file if missing (populating Brief from spec if found), and appends a
   `### Drift Warning` to Progress if the session deviated from Brief's Goal or Pass criteria
