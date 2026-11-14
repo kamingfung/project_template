@@ -16,9 +16,11 @@ experiments/**
 # Ignore kedro-viz metadata
 .viz/
 
-# Ignore file-based logs
+# Ignore file-based logs and profiling outputs
 *.log
 *.log.*
+profiling/*
+!profiling/.gitkeep
 
 ##########################
 # MLFLOW

@@ -9,6 +9,7 @@ description = "Modern Kedro + MLflow + uv project template"
 readme = "README.md"
 requires-python = ">=3.14,<3.15"
 dependencies = [
+  "humanize>=4.0.0,<5.0",
   "kedro[jupyter]>=1.0,<2.0",
   "kedro-datasets[pandas]>=9.0,<10.0",
   "kedro-mlflow>=2.0,<3.0",
@@ -102,6 +103,7 @@ preview = false
 "*.ipynb" = ["E402", "F821", "T201"]
 "tests/**/*.py" = ["E402", "PLC0415"]
 ".claude/**/*.py" = ["T201"]
+"src/**/profile_hook.py" = ["T201"]
 
 [tool.kedro_telemetry]
 project_id = "c9c39854391541eb964fec532e1f7b4d"
