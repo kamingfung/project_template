@@ -798,3 +798,66 @@ def test_dataset_hooks_noop_when_disabled() -> None:
 
     assert hook._dataset_profile == {}
     assert hook._node_profile == {}
+
+
+def test_save_partial_results_writes_csv_on_pipeline_error(tmp_path: Path) -> None:
+    """on_pipeline_error saves partial node and dataset CSVs when save_file=True."""
+    # Arrange
+    node_path = tmp_path / "node_partial.csv"
+    dataset_path = tmp_path / "dataset_partial.csv"
+    hook = ProfileHook(
+        save_file=True,
+        node_profile_path=node_path,
+        dataset_profile_path=dataset_path,
+    )
+    mock_node = Mock()
+    mock_node.name = "failing_node"
+    hook.before_dataset_loaded(dataset_name="raw_input", node=mock_node)
+    hook.after_dataset_loaded(dataset_name="raw_input", node=mock_node)
+    hook.before_node_run(node=mock_node, catalog=Mock(), inputs={})
+
+    # Act
+    with patch("builtins.print"):
+        hook.on_pipeline_error(
+            error=RuntimeError("boom"),
+            run_params={},
+            pipeline=Mock(),
+            catalog=Mock(),
+        )
+
+    # Assert
+    assert node_path.exists()
+    assert dataset_path.exists()
+    assert "failing_node" in node_path.read_text()
+    assert "raw_input" in dataset_path.read_text()
+
+
+def test_dataframe_to_rich_table_formats_numeric_columns_with_summary_rows() -> None:
+    """Numeric columns with empty-string summary cells stay right-aligned and 2-decimal padded."""
+    # Arrange
+    from project_template.profile_hook import _add_total_row, _add_wall_clock_row
+
+    df = pd.DataFrame(
+        {
+            "Execution Order": [1],
+            "Node Name": ["step_a"],
+            "Loading Time(s)": [0.1],
+            "Total Time(s)": [0.1],
+            "Total Time": ["a moment"],
+        }
+    )
+    display_df = _add_wall_clock_row(
+        _add_total_row(df, "Node Name"),
+        "Node Name",
+        1.2,
+    )
+
+    # Act
+    table = dataframe_to_rich_table(df=display_df)
+
+    # Assert
+    assert table.columns[0].justify == "right"
+    assert table.columns[2].justify == "right"
+    assert table.columns[2]._cells[0] == "0.10"
+    assert table.columns[2]._cells[1] == "0.10"
+    assert table.columns[2]._cells[2] == ""

@@ -1,8 +1,12 @@
 """Nodes for the data_processing pipeline."""
 
+import logging
+
 import pandas as pd
 
 from project_template.pipelines.data_processing.schemas import MODEL_INPUT_SCHEMA
+
+logger = logging.getLogger(__name__)
 
 
 def preprocess_companies(companies: pd.DataFrame) -> pd.DataFrame:
@@ -27,12 +31,21 @@ def create_model_input_table(
     companies: pd.DataFrame,
 ) -> pd.DataFrame:
     """Join preprocessed shuttles and companies and drop rows missing company ratings."""
+    rated_companies = companies.dropna(subset=["company_rating"])
+    dropped_count = len(companies) - len(rated_companies)
+    if dropped_count:
+        logger.warning(
+            "Dropped %d of %d company row(s) with missing company_rating.",
+            dropped_count,
+            len(companies),
+        )
     return (
         shuttles.merge(
-            companies.dropna(subset=["company_rating"]),
+            rated_companies,
             left_on="company_id",
             right_on="id",
             suffixes=("_shuttle", "_company"),
+            validate="many_to_one",
         )
         .rename(columns={"id_shuttle": "shuttle_id"})
         .pipe(MODEL_INPUT_SCHEMA.validate)

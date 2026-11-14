@@ -8,7 +8,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-import humanize
 import pandas as pd
 from kedro.framework.hooks import hook_impl
 from kedro.io import DataCatalog
@@ -44,10 +43,14 @@ class ProfileHook:
     env: str | list[str] = "local"
     save_file: bool = False
     node_profile_path: str | Path = field(
-        default_factory=lambda: f"node_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv"
+        default_factory=lambda: (
+            f"profiling/node_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv"
+        )
     )
     dataset_profile_path: str | Path = field(
-        default_factory=lambda: f"dataset_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv"
+        default_factory=lambda: (
+            f"profiling/dataset_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv"
+        )
     )
 
     def __post_init__(self) -> None:
@@ -79,6 +82,7 @@ class ProfileHook:
         self._node_profile: defaultdict[str, dict[str, Any]] = defaultdict(lambda: {})
         self._load_starts: dict[tuple[int, str, str], float] = {}
         self._save_starts: dict[tuple[int, str, str], float] = {}
+        self._lock = threading.Lock()
 
         self._pipeline_start: float = time.time()
         self._node_execution_order: int = 0
@@ -151,9 +155,10 @@ class ProfileHook:
         if self.disable:
             return
 
-        self._node_execution_order += 1
-        self._node_profile[node.name][EXECUTION_ORDER] = self._node_execution_order
-        self._node_profile[node.name][NODE_RUN_TIME] = time.time()
+        with self._lock:
+            self._node_execution_order += 1
+            self._node_profile[node.name][EXECUTION_ORDER] = self._node_execution_order
+            self._node_profile[node.name][NODE_RUN_TIME] = time.time()
 
     @hook_impl
     def after_node_run(
@@ -168,9 +173,10 @@ class ProfileHook:
         """
         if self.disable:
             return
-        self._node_profile[node.name][NODE_RUN_TIME] = (
-            time.time() - self._node_profile[node.name][NODE_RUN_TIME]
-        )
+        with self._lock:
+            self._node_profile[node.name][NODE_RUN_TIME] = (
+                time.time() - self._node_profile[node.name][NODE_RUN_TIME]
+            )
 
     @hook_impl
     def on_node_error(
@@ -194,10 +200,11 @@ class ProfileHook:
             return
 
         # Calculate partial node time if it was started
-        if NODE_RUN_TIME in self._node_profile[node.name]:
-            self._node_profile[node.name][NODE_RUN_TIME] = (
-                time.time() - self._node_profile[node.name][NODE_RUN_TIME]
-            )
+        with self._lock:
+            if NODE_RUN_TIME in self._node_profile[node.name]:
+                self._node_profile[node.name][NODE_RUN_TIME] = (
+                    time.time() - self._node_profile[node.name][NODE_RUN_TIME]
+                )
 
         # Save partial results when a node fails
         self.save_partial_results()
@@ -214,7 +221,8 @@ class ProfileHook:
         if self.disable:
             return
         key = (threading.get_ident(), dataset_name, node.name)
-        self._load_starts[key] = time.time()
+        with self._lock:
+            self._load_starts[key] = time.time()
 
     @hook_impl
     def after_dataset_loaded(self, dataset_name: str, node: Node) -> None:
@@ -228,19 +236,20 @@ class ProfileHook:
             return
         now = time.time()
         key = (threading.get_ident(), dataset_name, node.name)
-        start = self._load_starts.pop(key, now)
-        load_duration = now - start
+        with self._lock:
+            start = self._load_starts.pop(key, now)
+            load_duration = now - start
 
-        # Accumulate the duration instead of overwriting
-        self._dataset_profile[dataset_name][LOAD_TIME] = (
-            self._dataset_profile[dataset_name].get(LOAD_TIME, 0) + load_duration
-        )
-        self._node_profile[node.name][LOAD_TIME] = (
-            self._node_profile[node.name].get(LOAD_TIME, 0) + load_duration
-        )
-        self._dataset_profile[dataset_name][LOAD_COUNT] = (
-            self._dataset_profile[dataset_name].get(LOAD_COUNT, 0) + 1
-        )
+            # Accumulate the duration instead of overwriting
+            self._dataset_profile[dataset_name][LOAD_TIME] = (
+                self._dataset_profile[dataset_name].get(LOAD_TIME, 0) + load_duration
+            )
+            self._node_profile[node.name][LOAD_TIME] = (
+                self._node_profile[node.name].get(LOAD_TIME, 0) + load_duration
+            )
+            self._dataset_profile[dataset_name][LOAD_COUNT] = (
+                self._dataset_profile[dataset_name].get(LOAD_COUNT, 0) + 1
+            )
 
     @hook_impl
     def before_dataset_saved(self, dataset_name: str, node: Node) -> None:
@@ -253,7 +262,8 @@ class ProfileHook:
         if self.disable:
             return
         key = (threading.get_ident(), dataset_name, node.name)
-        self._save_starts[key] = time.time()
+        with self._lock:
+            self._save_starts[key] = time.time()
 
     @hook_impl
     def after_dataset_saved(self, dataset_name: str, node: Node) -> None:
@@ -267,19 +277,20 @@ class ProfileHook:
             return
         now = time.time()
         key = (threading.get_ident(), dataset_name, node.name)
-        start = self._save_starts.pop(key, now)
-        save_duration = now - start
+        with self._lock:
+            start = self._save_starts.pop(key, now)
+            save_duration = now - start
 
-        # Accumulate the duration instead of overwriting
-        self._dataset_profile[dataset_name][SAVE_TIME] = (
-            self._dataset_profile[dataset_name].get(SAVE_TIME, 0) + save_duration
-        )
-        self._node_profile[node.name][SAVE_TIME] = (
-            self._node_profile[node.name].get(SAVE_TIME, 0) + save_duration
-        )
-        self._dataset_profile[dataset_name][SAVE_COUNT] = (
-            self._dataset_profile[dataset_name].get(SAVE_COUNT, 0) + 1
-        )
+            # Accumulate the duration instead of overwriting
+            self._dataset_profile[dataset_name][SAVE_TIME] = (
+                self._dataset_profile[dataset_name].get(SAVE_TIME, 0) + save_duration
+            )
+            self._node_profile[node.name][SAVE_TIME] = (
+                self._node_profile[node.name].get(SAVE_TIME, 0) + save_duration
+            )
+            self._dataset_profile[dataset_name][SAVE_COUNT] = (
+                self._dataset_profile[dataset_name].get(SAVE_COUNT, 0) + 1
+            )
 
     @hook_impl
     def before_pipeline_run(
@@ -297,6 +308,7 @@ class ProfileHook:
         """
         if self.disable:
             return
+        self._pipeline_start = time.time()
         self.run_env = run_params.get("env") if run_params.get("env") else "local"
 
     @hook_impl
@@ -412,26 +424,36 @@ def dataframe_to_rich_table(df: pd.DataFrame) -> Table:
     # Create a copy to avoid modifying the original DataFrame
     df_formatted = df.copy()
 
-    # Format numeric columns with thousands separators and consistent decimal places
+    # Format numeric columns (including object columns coerced by "" summary cells)
     for col in df.columns:
-        if pd.api.types.is_numeric_dtype(df[col]):
-            # Check if column is integer type
-            is_integer_col = pd.api.types.is_integer_dtype(df[col])
-
+        non_empty = [v for v in df[col] if v != "" and pd.notna(v)]
+        is_numeric = pd.api.types.is_numeric_dtype(df[col]) or (
+            bool(non_empty)
+            and all(
+                isinstance(v, (int, float)) and not isinstance(v, bool)
+                for v in non_empty
+            )
+        )
+        if is_numeric:
+            is_integer_col = pd.api.types.is_integer_dtype(df[col]) or (
+                bool(non_empty) and all(isinstance(v, int) for v in non_empty)
+            )
             if is_integer_col:
-                # Format integers with thousands separators, no decimal places
                 df_formatted[col] = df_formatted[col].apply(
-                    lambda x: f"{int(x):,}" if pd.notna(x) else str(x)
+                    lambda x: (
+                        "" if x == "" else (f"{int(x):,}" if pd.notna(x) else str(x))
+                    )
                 )
             else:
-                # Format floats with thousands separators and 2 decimal places
                 df_formatted[col] = df_formatted[col].apply(
-                    lambda x: f"{x:,.2f}" if pd.notna(x) else str(x)
+                    lambda x: (
+                        ""
+                        if x == ""
+                        else (f"{float(x):,.2f}" if pd.notna(x) else str(x))
+                    )
                 )
-            # Add column with right alignment for numeric columns
             table.add_column(col, justify="right")
         else:
-            # Add column with left alignment for non-numeric columns
             table.add_column(col, justify="left")
 
     # Add rows
@@ -458,6 +480,20 @@ def print_rich_table_to_console(rich_table: Table) -> None:
     console.print(rich_table)
 
 
+def _format_duration(seconds: float) -> str:
+    """Format elapsed seconds into a concise human-readable string."""
+    if seconds < 1.0:
+        return "a moment"
+    if seconds < 60.0:
+        rounded = round(seconds)
+        return "a second" if rounded == 1 else f"{rounded} seconds"
+    minutes, rem_seconds = divmod(round(seconds), 60)
+    if minutes < 60:
+        return f"{minutes}m {rem_seconds}s"
+    hours, rem_minutes = divmod(minutes, 60)
+    return f"{hours}h {rem_minutes}m {rem_seconds}s"
+
+
 def _build_profile_table(
     dictionary: Mapping[str, dict[str, Any]],
     index_name: str,
@@ -465,15 +501,11 @@ def _build_profile_table(
 ) -> pd.DataFrame:
     """Build a sorted, rounded profiling DataFrame from raw timing metrics."""
     df = pd.DataFrame.from_dict(dict(dictionary), orient="index")
-    temp_cols = [col for col in df.columns if col.startswith("_temp_")]
-    df = df.drop(columns=temp_cols, errors="ignore")
     for col in time_cols:
         if col not in df.columns:
             df[col] = 0.0
     df[TOTAL_TIME] = df[time_cols].sum(axis=1, skipna=True)
-    df["Total Time"] = df[TOTAL_TIME].apply(
-        lambda x: humanize.naturaldelta(x, minimum_unit="seconds")
-    )
+    df["Total Time"] = df[TOTAL_TIME].apply(_format_duration)
     return (
         df.reset_index(names=index_name)
         .sort_values(TOTAL_TIME, ascending=False)
@@ -577,7 +609,7 @@ def _add_total_row(df: pd.DataFrame, index_col_name: str) -> pd.DataFrame:
         if col == "Total Time":
             if TOTAL_TIME in source_df.columns:
                 total_seconds = source_df[TOTAL_TIME].sum()
-                return humanize.naturaldelta(total_seconds, minimum_unit="seconds")
+                return _format_duration(total_seconds)
             return ""
         if pd.api.types.is_numeric_dtype(source_df[col]):
             return round(source_df[col].sum(), 2)
@@ -609,7 +641,7 @@ def _add_wall_clock_row(
         if col == TOTAL_TIME:
             return round(wall_clock_seconds, 2)
         if col == "Total Time":
-            return humanize.naturaldelta(wall_clock_seconds, minimum_unit="seconds")
+            return _format_duration(wall_clock_seconds)
         return ""
 
     return _append_summary_row(df, index_col_name, "Time Elapsed", _col_value)

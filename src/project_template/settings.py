@@ -1,7 +1,6 @@
 """Project settings for Kedro."""
 
 import sys
-import time
 
 from kedro.config import OmegaConfigLoader
 
@@ -24,14 +23,4 @@ CONFIG_LOADER_ARGS = {
 
 _is_dry_run = any("DryRunner" in arg for arg in sys.argv)
 
-HOOKS: tuple[ProfileHook, ...] = (
-    ()
-    if _is_dry_run
-    else (
-        ProfileHook(
-            save_file=True,
-            node_profile_path=f"profiling/node_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv",
-            dataset_profile_path=f"profiling/dataset_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv",
-        ),
-    )
-)
+HOOKS: tuple[ProfileHook, ...] = () if _is_dry_run else (ProfileHook(save_file=True),)

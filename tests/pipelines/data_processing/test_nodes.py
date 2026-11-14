@@ -89,3 +89,21 @@ def test_create_model_input_table_rejects_negative_price(
             shuttles=shuttles_clean,
             companies=companies_clean,
         )
+
+
+def test_create_model_input_table_duplicate_company_raises(
+    sample_companies: pd.DataFrame,
+    sample_shuttles: pd.DataFrame,
+) -> None:
+    """Duplicate company IDs fail loudly instead of multiplying shuttle rows."""
+    companies_clean = preprocess_companies(companies=sample_companies)
+    duplicated_companies = pd.concat(
+        [companies_clean, companies_clean.iloc[[0]]], ignore_index=True
+    )
+    shuttles_clean = preprocess_shuttles(shuttles=sample_shuttles)
+
+    with pytest.raises(pd.errors.MergeError):
+        create_model_input_table(
+            shuttles=shuttles_clean,
+            companies=duplicated_companies,
+        )
