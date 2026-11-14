@@ -1,0 +1,22 @@
+# yamllint configuration matching VS Code YAML extension validation behavior
+extends: default
+
+rules:
+  line-length:
+    max: 88
+    level: warning
+    allow-non-breakable-inline-mappings: true
+    allow-non-breakable-words: true
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+  comments:
+    min-spaces-from-content: 1
+  empty-values:
+    forbid-in-block-mappings: false
+    forbid-in-flow-mappings: false
+  document-start: disable
+  truthy:
+    allowed-values: ["true", "false", "on", "off"]
+  trailing-spaces: {}

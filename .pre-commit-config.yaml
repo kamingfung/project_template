@@ -1,26 +1,43 @@
+---
 repos:
-- repo: https://github.com/psf/black
-  rev: 25.1.0
-  hooks:
-  - id: black-jupyter
-    language_version: python3
-- repo: https://github.com/kynan/nbstripout
-  rev: 0.8.1
-  hooks:
-  - id: nbstripout
-    name: nbstripout
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v5.0.0
-  hooks:
-  - id: check-added-large-files
-    args: [ '--maxkb=5000' ] # Measured in kilobytes
-  - id: detect-private-key
-- repo: https://github.com/Yelp/detect-secrets
-  rev: v1.5.0
-  hooks:
-  - id: detect-secrets
-    name: 'detect-secrets'
-    args: [ '--exclude-files', '.*\.ipynb$' ]
-  - id: detect-secrets
-    name: 'detect-secrets-jupyter'
-    args: [ '--exclude-files', '.*[^i][^p][^y][^n][^b]$', '--exclude-lines', '"(hash|id|image/\w+)":.*' ]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-docstring-first
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-yaml
+        args: [--unsafe]
+      - id: check-toml
+      - id: check-added-large-files
+        args: [--maxkb=500, --enforce-all]
+        files: \.(pkl|parquet|csv|h5|zip|tar|gz)$
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.0
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.9.1
+    hooks:
+      - id: nbstripout
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.11.32
+    hooks:
+      - id: uv-lock
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        args: [-c, .yamllint.yml]
+  - repo: https://github.com/ComPWA/taplo-pre-commit
+    rev: v0.9.3
+    hooks:
+      - id: taplo-format
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks
