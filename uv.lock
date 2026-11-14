@@ -1379,15 +1379,6 @@ wheels = [
 ]
 
 [[package]]
-name = "humanize"
-version = "4.17.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/d0/a7/5391f6db94bf16289ca63ce2632eef2eba7b9991e701016ac66f04539d47/humanize-4.17.0.tar.gz", hash = "sha256:1d6a36c453dbfbb3f0b34601d2e0b4ce5d48d780305cd45714843f0068fde6ac", size = 90688, upload-time = "2026-11-12T12:33:34.37Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/0c/74/bb970f876202aa0e8c4a1e9904f0b3482e73c752512962b7e957091d5acf/humanize-4.17.0-py3-none-any.whl", hash = "sha256:02d0899527760efe18011944f882df4970943b4cdff7b5a0ba7fed43a576ef98", size = 133715, upload-time = "2026-11-12T12:33:32.955Z" },
-]
-
-[[package]]
 name = "hyperframe"
 version = "6.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2992,16 +2983,13 @@ name = "project-template"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "humanize" },
     { name = "kedro", extra = ["jupyter"] },
     { name = "kedro-datasets", extra = ["pandas"] },
     { name = "kedro-mlflow" },
-    { name = "marimo" },
     { name = "mlflow" },
     { name = "pandas" },
     { name = "pandera" },
     { name = "pyarrow" },
-    { name = "ray" },
 ]
 
 [package.dev-dependencies]
@@ -3009,6 +2997,7 @@ dev = [
     { name = "ipython" },
     { name = "jupyter" },
     { name = "kedro-viz" },
+    { name = "marimo" },
     { name = "pre-commit" },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -3021,16 +3010,13 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "humanize", specifier = ">=4.0.0,<5.0" },
     { name = "kedro", extras = ["jupyter"], specifier = ">=1.0,<2.0" },
     { name = "kedro-datasets", extras = ["pandas"], specifier = ">=9.0,<10.0" },
     { name = "kedro-mlflow", specifier = ">=2.0,<3.0" },
-    { name = "marimo", specifier = ">=0.25.2" },
     { name = "mlflow", specifier = ">=3.0,<4.0" },
     { name = "pandas", specifier = ">=2.2,<4.0" },
     { name = "pandera", specifier = ">=0.30.1,<0.31" },
     { name = "pyarrow", specifier = ">=19.0,<25.0" },
-    { name = "ray", specifier = ">=2.60,<3.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -3038,6 +3024,7 @@ dev = [
     { name = "ipython", specifier = ">=8.10" },
     { name = "jupyter", specifier = ">=1.1.1" },
     { name = "kedro-viz", specifier = ">=12.0" },
+    { name = "marimo", specifier = ">=0.25.2" },
     { name = "pre-commit", specifier = ">=4.2.0" },
     { name = "pytest", specifier = ">=8.0" },
     { name = "pytest-cov", specifier = ">=6.0" },
@@ -3588,27 +3575,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/85/ae/ecc7c77cd6ea18ff7b2b07a2fd0db5c31c2204ecf9a774e80bd1250dc9d9/pyzmq-27.3.0-cp314-cp314t-win32.whl", hash = "sha256:0228fe121f05a8b638ef218dde7508477a8c46200a588f71ce7143d85987cdd7", size = 597206, upload-time = "2026-11-04T00:29:59.35Z" },
     { url = "https://files.pythonhosted.org/packages/7a/1d/0bee73e1e8ab1c26eecba13a4725dfbe0405b53f451a91671dd515effe00/pyzmq-27.3.0-cp314-cp314t-win_amd64.whl", hash = "sha256:8a3d02fc710302a23c9a67b287bc13f2992067d398c3192b50eb0e30d44ed885", size = 685132, upload-time = "2026-11-04T00:30:01.144Z" },
     { url = "https://files.pythonhosted.org/packages/cd/23/13a768f9a8e66a999250abd216e50e1961a1cd4a8708749f656f5c0c2aea/pyzmq-27.3.0-cp314-cp314t-win_arm64.whl", hash = "sha256:2b9f08778b608fe4f6250e2d132f41b4f99fa8d03051cf2809b1c0420def81b4", size = 595549, upload-time = "2026-11-04T00:30:02.693Z" },
-]
-
-[[package]]
-name = "ray"
-version = "2.60.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "click" },
-    { name = "filelock" },
-    { name = "jsonschema" },
-    { name = "msgpack" },
-    { name = "packaging" },
-    { name = "protobuf" },
-    { name = "pyyaml" },
-    { name = "requests" },
-]
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/35/3b/e8ae1500207316e9a13879514f50fe77820b942b1adcfed5a69b6c22624e/ray-2.60.0-cp314-cp314-macosx_12_0_arm64.whl", hash = "sha256:367d6efe7a15651d75aa0c754853f84ef27d931d49ebc531a307902a8e728811", size = 67723302, upload-time = "2026-11-04T02:00:55.776Z" },
-    { url = "https://files.pythonhosted.org/packages/2e/01/f1b10b2ff373f72c9d9bf4aa9cce9062a375fe5a0a4f26587c3ed769e372/ray-2.60.0-cp314-cp314-manylinux2014_aarch64.whl", hash = "sha256:b20215a57f887b203463d5b8074c8b133bce23ae89c85522b9f932ddc589301f", size = 78204259, upload-time = "2026-11-04T02:01:01.188Z" },
-    { url = "https://files.pythonhosted.org/packages/d7/cc/f1e0d6121540b8235a70c4fa844a8fd95d26606849f1064f69d6a973f023/ray-2.60.0-cp314-cp314-manylinux2014_x86_64.whl", hash = "sha256:0ec3f44af2961d8cad2f8d699b470e2f6843d443ccc6f403948aeeeb77ad35c3", size = 79213605, upload-time = "2026-11-04T02:01:06.808Z" },
-    { url = "https://files.pythonhosted.org/packages/da/3d/c012492ffcc47343b6f366746970fe0e52d0871bc10e9446e95615b9ab08/ray-2.60.0-cp314-cp314-win_amd64.whl", hash = "sha256:2a5ad62b1b00797aed7ac6a6aa8931b7d69eaed5b52e49d705d31f18fdcdbbd3", size = 29897791, upload-time = "2026-11-04T02:01:11.296Z" },
 ]
 
 [[package]]
