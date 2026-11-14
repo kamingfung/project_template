@@ -7,19 +7,19 @@ from project_template.pipelines.data_processing.schemas import MODEL_INPUT_SCHEM
 
 def preprocess_companies(companies: pd.DataFrame) -> pd.DataFrame:
     """Parse boolean flags and percentage ratings in raw company records."""
-    df = companies.copy()
-    df["iata_approved"] = _is_true(df["iata_approved"])
-    df["company_rating"] = _parse_percentage(df["company_rating"])
-    return df
+    return companies.assign(
+        iata_approved=lambda df: _is_true(df["iata_approved"]),
+        company_rating=lambda df: _parse_percentage(df["company_rating"]),
+    )
 
 
 def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
     """Parse boolean flags and currency prices in raw shuttle records."""
-    df = shuttles.copy()
-    df["d_check_complete"] = _is_true(df["d_check_complete"])
-    df["moon_clearance_complete"] = _is_true(df["moon_clearance_complete"])
-    df["price"] = _parse_money(df["price"])
-    return df
+    return shuttles.assign(
+        d_check_complete=lambda df: _is_true(df["d_check_complete"]),
+        moon_clearance_complete=lambda df: _is_true(df["moon_clearance_complete"]),
+        price=lambda df: _parse_money(df["price"]),
+    )
 
 
 def create_model_input_table(
@@ -27,15 +27,16 @@ def create_model_input_table(
     companies: pd.DataFrame,
 ) -> pd.DataFrame:
     """Join preprocessed shuttles and companies and drop rows missing company ratings."""
-    rated_companies = companies.dropna(subset=["company_rating"])
-    merged = shuttles.merge(
-        rated_companies,
-        left_on="company_id",
-        right_on="id",
-        suffixes=("_shuttle", "_company"),
+    return (
+        shuttles.merge(
+            companies.dropna(subset=["company_rating"]),
+            left_on="company_id",
+            right_on="id",
+            suffixes=("_shuttle", "_company"),
+        )
+        .rename(columns={"id_shuttle": "shuttle_id"})
+        .pipe(MODEL_INPUT_SCHEMA.validate)
     )
-    result = merged.rename(columns={"id_shuttle": "shuttle_id"})
-    return MODEL_INPUT_SCHEMA.validate(result)
 
 
 def _is_true(series: pd.Series) -> pd.Series:
@@ -43,14 +44,18 @@ def _is_true(series: pd.Series) -> pd.Series:
 
 
 def _parse_percentage(series: pd.Series) -> pd.Series:
-    cleaned = series.astype("string").str.replace("%", "", regex=False)
-    return pd.to_numeric(cleaned, errors="coerce") / 100.0
+    return (
+        series.astype("string")
+        .str.replace("%", "", regex=False)
+        .pipe(pd.to_numeric, errors="coerce")
+        .div(100.0)
+    )
 
 
 def _parse_money(series: pd.Series) -> pd.Series:
-    cleaned = (
+    return (
         series.astype("string")
         .str.replace("$", "", regex=False)
         .str.replace(",", "", regex=False)
+        .pipe(pd.to_numeric, errors="coerce")
     )
-    return pd.to_numeric(cleaned, errors="coerce")
