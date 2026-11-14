@@ -23,7 +23,7 @@ Do NOT create a steering file for:
 
 Every steering file must have:
 
-1. **Front-matter** with `inclusion` mode and `fileMatchPattern` if scoped
+1. **Front-matter** with `paths:` glob list if scoped (omit `paths:` for always-on rules)
 2. **A single `#` title** that names the domain
 3. **Sections** that group related rules, each ≤15 lines
 4. **Examples** only when the rule is ambiguous without one (good vs bad pattern)

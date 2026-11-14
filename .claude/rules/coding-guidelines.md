@@ -57,9 +57,9 @@ Follow the explanation cascade — stop at the first level that is sufficient:
 1. **Descriptive name** — rename; no comment needed.
 2. **Concise inline comment** — one short phrase if the name isn't enough.
 3. **Docstring** — when the _why_ needs a paragraph.
-4. **External doc** — route by stability: reproducible/stable → `docs/`; branch-specific/may-change → `changelogs/epics/<TICKET-ID>.md`.
+4. **External doc** — route by stability: reproducible/stable → `docs/`; branch-specific/may-change → PR description or changelog.
 
-Full routing table: [`code_style.md` — Where explanation belongs](../../docs/dev_guidelines/code_style.md#where-explanation-belongs).
+Full routing table: [`code_style.md` — Where explanation belongs](../../docs/developer_guides/code_style.md#where-explanation-belongs).
 
 - Keep ticket ids (`<TICKET-ID>`) and dates out of code comments, docstrings, test names and docstrings, YAML comments and doc headings; they belong in the changelog and the commit message.
 - Before a comment, docstring, doc or PR description states what code does or who reads a column, dataset or param, check it: read the code path and `git grep` the name across `src/` and `conf/`. Name the reader you found, not the one you expect.
@@ -76,7 +76,7 @@ Transform vague tasks into verifiable goals before starting:
 | "Refactor X"          | "Tests pass before and after"                         |
 | "Improve performance" | "Reduce execution time from X to Y seconds"           |
 
-A change that can move model outputs (features, model inputs, model params, a bug fix in a pipeline the models read) is verified by a backtest, not by tests alone: run the affected model's backtest on `main` and on the branch, and record both metrics and run ids in the changelog before requesting review. A pure refactor or deletion of unread code instead shows that outputs are unchanged.
+A change that can move pipeline outputs is verified end to end on `main` and on the branch before review. A pure refactor or deletion of unread code shows that outputs are unchanged.
 
 For multi-step tasks, state a brief plan with verifiable checkpoints before
 implementing.

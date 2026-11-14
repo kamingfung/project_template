@@ -16,7 +16,7 @@ Applies to PRs and to Confluence experiment reports. Adapted from "The good refe
 - [ ] Access blockers (unpushed branch, missing data or permissions) raised first, and the parts you cannot judge named up front
 - [ ] Value: the work addresses a real problem and places itself against prior work (earlier tickets, changelogs, existing code)
 - [ ] Soundness: baseline or control, statistics, benchmark against the current approach, conclusions backed by the data, limitations stated
-- [ ] Reproducible from the PR or page alone: pushed branch and commit, data pull date, MLflow run ids, the command to rerun (`docs/dev_guidelines/writing_standards.md` Body and Back Matter)
+- [ ] Reproducible from the PR or page alone: pushed branch and commit, data pull date, MLflow run ids, the command to rerun (`docs/developer_guides/writing_standards.md` Structure and Evidence)
 - [ ] Code, config and data the work describes were read; the author's run evidence (the backtest item under Behavior) was rerun when missing or when a result is surprising, and otherwise a finding from reading code only says so
 - [ ] Design and logic findings come before style and edge cases
 - [ ] Essentials only, not a wish list; findings numbered and labeled must-fix, should-fix or nit
@@ -30,7 +30,7 @@ Applies to PRs and to Confluence experiment reports. Adapted from "The good refe
 - [ ] No speculative features or unrequested abstractions
 - [ ] Changes are surgical — only touch what is necessary
 - [ ] Success criteria defined and verified
-- [ ] Model-affecting change (features, inputs, params, pipeline bug fix) has a before/after backtest on `main` vs branch, with metrics and run ids in the changelog. Before opening the PR, publish both runs as in `docs/dev_guidelines/running-pipelines.md` "Publishing a run to dev" (manual path: `notebooks/log_in_season_accuracy_metrics.ipynb`), and cite both dev run ids in the PR description and the changelog
+- [ ] Pipeline-affecting change has before/after verification on `main` vs branch, with metrics/outputs recorded in the PR description
 - [ ] Deletions leave no orphans: param keys, catalog entries, test fixtures, `utils/` helpers and doc links with no remaining reader are removed
 
 ## Code style
@@ -45,7 +45,7 @@ Applies to PRs and to Confluence experiment reports. Adapted from "The good refe
 - [ ] Type hints on every signature, and an inline hint on every new local variable
 - [ ] Keyword arguments in calls that pass more than two arguments
 - [ ] A value read by one function is local to it; module level only once a second function reads it
-- [ ] Single return statement at end
+- [ ] Guard clauses first (no deeply nested happy path)
 
 ## Documentation
 
@@ -54,12 +54,10 @@ Applies to PRs and to Confluence experiment reports. Adapted from "The good refe
 - [ ] DataFrame returns list output columns: `|col1|col2|`
 - [ ] Docstring explains _why_, code shows _what_
 - [ ] Model and dataset docs updated when behavior, params or datasets change, including how a config value is set and how to update it
-- [ ] New terms in docstrings, comments and the PR description reuse existing ones or are defined at first use (`docs/dev_guidelines/writing_standards.md` Terminology)
-- [ ] Inline comments are concise — no multi-line explanations; detailed context goes to `docs/` (if stable/reproducible) or `changelogs/epics/` (if branch-specific or may change)
-- [ ] Experiment results, backtest tables, and arm comparisons are in `changelogs/epics/`, not in `docs/model_documentation/` or YAML — including dated or "illustrative" snapshots; the doc states the rule and links to the changelog
-- [ ] No ticket ids (`<TICKET-ID>`) or dates in code comments, docstrings, tests or doc headings
+- [ ] New terms in docstrings, comments and the PR description reuse existing ones or are defined at first use (`docs/developer_guides/writing_standards.md` Terminology)
+- [ ] Inline comments are concise — no multi-line explanations; detailed context goes to `docs/` (if stable/reproducible) or the PR description (if branch-specific)
+- [ ] No ticket ids or dates in code comments, docstrings, tests or doc headings
 - [ ] Comments, docstrings, docs and the PR description match the code: every named reader or behavior was checked by reading the code or `git grep`
-- [ ] Each ticket has its own `changelogs/epics/<TICKET-ID>-*.md` in Brief → Progress → Decisions order, with no placeholder links
 
 ## Data integrity
 

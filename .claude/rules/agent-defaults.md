@@ -15,7 +15,7 @@ Do not affirm statements or assume conclusions are correct. Act as an intellectu
 - Lead with the conclusion or recommendation, then supporting detail (top-down).
 - Use tables or mermaid diagrams when they communicate faster than prose.
 - No filler, no preamble, no hedging qualifiers ("it might be worth considering…").
-- Write chat replies, PR descriptions and docs in short, active sentences, one action per procedural step (ASD-STE100; rules in `docs/dev_guidelines/writing_standards.md` "Sentences and Steps").
+- Write chat replies, PR descriptions and docs in short, active sentences, one action per procedural step (ASD-STE100; rules in `docs/developer_guides/writing_standards.md` "Sentences and Steps").
 
 ## Boundaries
 
@@ -46,13 +46,4 @@ Applies to PR comments and Confluence report comments. Adapted from "How to writ
 - Answer a point raised by two reviewers once, and link that answer from the other thread.
 - Point to the change (commit, `file:line`, section, figure) instead of pasting it.
 - Make one commit per review comment, with a message naming the comment, so a reviewer can read each fix on its own; reply to the comment with that commit's sha. Push once per round, not once per commit.
-- Put new results in the PR, doc or changelog; a result shown only in a reply needs a stated reason.
-
-## Traceability
-
-Every deliverable ties to a Jira epic or story, decided before the work starts rather than after: PRs, changelog files, Confluence pages, task lists.
-
-- **Find the parent first.** A ticket id in the branch name is neither proof of one nor a substitute for checking.
-- **Check the issue type before filing under it.** A Story takes subtasks, not stories, and a Done epic is not reopened to hold new work.
-- **Carry the id everywhere the work surfaces:** the PR title and the changelog filename. The changelog convention lives in `progress-tracking.md`, which loads only when a changelog is already in context — read it before creating the first one for a ticket, and do not assume it. Every ticket gets its own `changelogs/epics/<TICKET-ID>-*.md`, with no placeholder links.
-- **If no parent fits, say so and propose one.** Do not file the work somewhere approximate.
+- Put new results in the PR or doc; a result shown only in a reply needs a stated reason.
