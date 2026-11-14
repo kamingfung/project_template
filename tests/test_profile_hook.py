@@ -781,3 +781,20 @@ def test_integration_full_pipeline_simulation():
         assert "raw_data" in hook._dataset_profile
         assert "processed_data" in hook._dataset_profile
         assert "model_output" in hook._dataset_profile
+
+
+def test_dataset_hooks_noop_when_disabled() -> None:
+    """Dataset load and save hooks do nothing when KEDRO_PROFILE_DISABLE=1."""
+    from kedro.pipeline import node
+
+    test_node = node(lambda x: x, "raw_data", "output_data", name="test_node")
+
+    with patch.dict(os.environ, {"KEDRO_PROFILE_DISABLE": "1"}):
+        hook = ProfileHook()
+        hook.before_dataset_loaded("raw_data", test_node)
+        hook.after_dataset_loaded("raw_data", test_node)
+        hook.before_dataset_saved("output_data", test_node)
+        hook.after_dataset_saved("output_data", test_node)
+
+    assert hook._dataset_profile == {}
+    assert hook._node_profile == {}
