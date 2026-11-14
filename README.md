@@ -1,175 +1,83 @@
 # project_template
 
-## Outline of this README
+Modern data science and analytics project template built on **Kedro**, **MLflow**, **uv**, **just**, **ruff**, **ty**, and **pytest**, with unified **Kiro** and **Claude Code** steering.
 
-- [Introduction](#introduction)
-- [Workflow](#workflow)
-- [Project Setup](#project-setup)
-- [Folder Structure](#folder-structure)
-- [How To](#how-to)
-- [Typical Runtime](#typical-runtime)
-- [Contact & Support](#contact--support)
+## Stack
 
-## Introduction
+- **Environment & packaging:** `uv` (Python 3.14)
+- **Task runner:** `just` (`Justfile`)
+- **Pipeline framework:** `kedro` + `kedro-datasets` + `kedro-viz`
+- **Experiment tracking:** `mlflow` + `kedro-mlflow` (local SQLite backend by default)
+- **Code quality:** `ruff` (lint + format), `ty` (type check), `pre-commit`
+- **Testing:** `pytest` with `pytest-cov`, `pytest-xdist`, `pytest-sugar`, and `pytest-mock`
 
-Project/repo template I found useful.
+## Quickstart
 
-## Workflow
+1. Install prerequisites (`uv` and `just`):
 
-The pipeline consists of the following components:
+   ```bash
+   brew install uv just
+   ```
 
-- **Preprocessing** - ingesting data and creating intermediate features.
-- **Postprocessing** - combining the results from the above models to generate analytics and feature tables, including:
+2. Initialize the Python environment and pre-commit hooks:
 
-```mermaid
-%%{init: {"flowchart": {"htmlLabels": false}} }%%
+   ```bash
+   just init
+   ```
 
-flowchart LR
+3. Run the example Kedro pipeline (processes sample CSVs in `data/01_raw/` and logs metrics to `mlflow.db`):
 
-    subgraph "`**Template**`"
+   ```bash
+   just run
+   ```
 
-        direction LR
-        subgraph Preprocessing
-            A[input] ---> B[features]
-        end
+4. Inspect the pipeline or MLflow runs:
 
-        subgraph Postprocessing
-            B ---> C[outputs]
-        end
-    end
-```
+   ```bash
+   just viz           # launch Kedro-Viz
+   just mlflow-local  # launch MLflow UI on a free port
+   ```
 
-## Project Setup
+## Common Commands
 
-0) Make sure you have `git` installed on your machine. I recommend using [Homebrew](https://brew.sh/) to install it on a Mac. I also recommend using Visual Studio Code as your IDE.
-
-    ```bash
-    # installing git via homebrew
-    brew install git
-
-    # installing Visual Studio Code
-    brew install --cask visual-studio-code
-    ```
-
-1) Clone this repo to your local machine, e.g.,
-
-    ```bash
-    git clone https://github.com/kamingfung/project_template.git
-    ```
-
-2) Create a virtual environment using a package management tool: a) [Miniforge](https://github.com/conda-forge/miniforge) or b) [uv](https://github.com/astral-sh/uv)
-
-    a) Miniforge (results in an environment named `project_template`, living in `~/miniforge3/envs/project_template`):
-
-    1. Install Miniforge
-
-        ```sh
-        # On macOS and Linux.
-        curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
-
-        bash Miniforge3-$(uname)-$(uname -m).sh
-        ```
-
-        ```sh
-        # On Windows.
-        #  Please refer to the [Miniforge](https://github.com/conda-forge/miniforge) documentation for installation instructions.
-        ```
-
-    2. Create a new environment. In this template, I've named it `project_template` and included a list of geospatial packages as examples. See and adjust `environment.yml` and `requirements.txt` as needed.
-
-        ```bash
-        conda env create -f environment.yml
-        ```
-
-    3. Activate the environment. From the terminal, run:
-
-        ```bash
-        conda activate project_template # project_template is the default name of the environment; change it if you've named it differently
-        ```
-
-    4. (If you use PDAL) Install `pdal` for Python first!
-    PDAL Python support is hosted in a separate repository than PDAL itself on GitHub. If you have a working PDAL installation and a working Python installation, you can install the extension using the following procedure on Unix. The procedure on Windows is similar.
-
-        ```bash
-        conda install --channel conda-forge pdal python-pdal --name project_template
-        ```
-
-    b) uv (results in an environment named `.venv`, living in the root of the project):
-
-    1. Install uv
-
-        ```bash
-        # On macOS and Linux.
-        curl -LsSf <https://astral.sh/uv/install.sh> | sh
-        ```
-
-        ```bash
-        # On Windows.
-        powershell -ExecutionPolicy ByPass -c "irm <https://astral.sh/uv/install.ps1> | iex"
-        ```
-
-    2. Create a new environment. In this template, I've named it `project_template` and included a list of geospatial packages as examples. See and adjust `pyproject.toml` and `requirements.txt` as needed.
-
-        ```bash
-        uv add -r requirements.txt # add the requirements
-        uv sync # install the packages
-        ```
-
-3) Install pre-commit so the repo is automatically formatted to [black](https://ljvmiranda921.github.io/notebook/2018/06/21/precommits-using-black-and-flake8/).
-
-    From the terminal, run:
-
-    ```bash
-    pre-commit install
-
-    # optional
-    pre-commit run --all-files # run the pre-commit hooks on all files
-    pre-commit autoupdate # update the pre-commit hooks
-    ```
+| Command | Purpose |
+| --- | --- |
+| `just init` | Install Python 3.14, sync `uv` dependencies, and install pre-commit hooks |
+| `just run` | Run the default Kedro pipeline |
+| `just test` | Run unit tests in parallel without coverage |
+| `just test_ci` | Run unit tests with coverage report (90% minimum on node modules) |
+| `just lint` | Auto-fix lint issues and format code with `ruff` |
+| `just lint_check` | Verify `ruff` lint/format and stripped notebook outputs |
+| `just typecheck` | Run static type checking with `ty` |
+| `just viz` | Launch Kedro-Viz |
+| `just mlflow-local` | Launch MLflow UI against `sqlite:///mlflow.db` |
 
 ## Folder Structure
 
-This project's files are structured as follows:
-
-```bash
-.
-├── data                    # for all data files
-│   ├── 01_raw
-│   ├── 02_intermediate
-│   ├── 03_primary
-│   ├── 04_feature
-│   ├── 05_model_input
-│   ├── 06_models
-│   ├── 07_model_output
-│   └── 08_reporting
-│
-├── docs                    # for all documentation
-│
-├── experiments             # for experimental code / notebooks
-│
-└── src                     # for all source code
-    └── utils
-        ├── config.py
-        └── helpers.py
+```text
+├── .claude/             # Claude Code rules, skills, hooks, and safety settings
+├── .kiro/steering/      # Single source of truth for agent steering rules
+├── conf/
+│   ├── base/            # Catalog, parameters, and globals
+│   ├── local/           # Local overrides (e.g., mlflow.yml)
+│   └── logging.yml      # Kedro logging configuration
+├── data/                # Kedro data layers (01_raw -> 08_reporting)
+├── docs/                # Design specs, plans, and project docs
+├── notebooks/           # Exploratory notebooks (outputs stripped by pre-commit)
+├── src/project_template/
+│   ├── pipelines/       # Modular Kedro pipelines (data_processing, reporting)
+│   ├── pipeline_registry.py
+│   └── settings.py
+├── tests/               # Unit tests mirroring src/project_template/
+├── CLAUDE.md            # Imports always-on steering from .kiro/steering/
+├── Justfile             # Task runner recipes
+└── pyproject.toml       # Project metadata, dependencies, and tool config
 ```
 
-## How To
+## Steering & Agent Rules
 
-### Run the pipeline locally
+Coding, testing, and documentation rules live in `.kiro/steering/` as the single source of truth:
 
-1. ...
-
-## Typical Runtime
-
-The typical runtime is as follows:
-
-| Step           | Runtime   |
-|----------------|-----------|
-| Preprocessing  | ??? hours |
-| Postprocessing | ??? hours |
-
-## Contact & Support
-
-For general questions, access to the data, or questions related to the pipeline, please contact:
-
-- Person 1: [email](mailto:xxx@yy.com)
+- Always-on rules are imported by `CLAUDE.md`.
+- File-scoped rules are mapped in `.claude/rules/` via `paths:` front-matter.
+- On-demand workflows live in `.claude/skills/`.
