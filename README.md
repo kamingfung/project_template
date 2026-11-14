@@ -55,6 +55,33 @@ Modern data science and analytics project template built on **Kedro**, **MLflow*
 | `just marimo` | Launch Marimo reactive notebook editor |
 | `just mlflow-local` | Launch MLflow UI against `sqlite:///mlflow.db` |
 
+## Updating Packages
+
+Use `uv` to add, upgrade, and re-lock dependencies in `pyproject.toml` and `uv.lock`:
+
+```bash
+# Add a runtime or dev dependency
+uv add <package>
+uv add --dev <package>
+
+# Upgrade a single package and sync the environment
+uv lock --upgrade-package <package>
+uv sync --all-groups
+
+# Upgrade all packages within pyproject.toml constraints
+uv lock --upgrade
+uv sync --all-groups
+
+# Update pre-commit hook versions
+uv run pre-commit autoupdate
+```
+
+After updating packages, verify the lockfile and quality gates:
+
+```bash
+just audit && just lint_check && just typecheck && just test_ci
+```
+
 ## Folder Structure
 
 ```text
