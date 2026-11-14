@@ -1,9 +1,10 @@
 import importlib
 import os
+import threading
 import time
 from collections import defaultdict
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -42,9 +43,11 @@ class ProfileHook:
 
     env: str | list[str] = "local"
     save_file: bool = False
-    node_profile_path: str | Path = f"node_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv"
-    dataset_profile_path: str | Path = (
-        f"dataset_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv"
+    node_profile_path: str | Path = field(
+        default_factory=lambda: f"node_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv"
+    )
+    dataset_profile_path: str | Path = field(
+        default_factory=lambda: f"dataset_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv"
     )
 
     def __post_init__(self) -> None:
@@ -74,6 +77,8 @@ class ProfileHook:
             lambda: {}
         )
         self._node_profile: defaultdict[str, dict[str, Any]] = defaultdict(lambda: {})
+        self._load_starts: dict[tuple[int, str, str], float] = {}
+        self._save_starts: dict[tuple[int, str, str], float] = {}
 
         self._pipeline_start: float = time.time()
         self._node_execution_order: int = 0
@@ -206,10 +211,10 @@ class ProfileHook:
             dataset_name: Name of the dataset being loaded.
             node: The Kedro node loading the dataset.
         """
-        curr = time.time()
-        # Store start time in a temporary key to avoid overwriting accumulated times
-        self._dataset_profile[dataset_name]["_temp_load_start"] = curr
-        self._node_profile[node.name]["_temp_load_start"] = curr
+        if self.disable:
+            return
+        key = (threading.get_ident(), dataset_name, node.name)
+        self._load_starts[key] = time.time()
 
     @hook_impl
     def after_dataset_loaded(self, dataset_name: str, node: Node) -> None:
@@ -219,20 +224,19 @@ class ProfileHook:
             dataset_name: Name of the dataset that was loaded.
             node: The Kedro node that loaded the dataset.
         """
-        # Calculate elapsed time from temporary start time
-        load_duration = time.time() - self._dataset_profile[dataset_name].get(
-            "_temp_load_start", time.time()
-        )
-        node_load_duration = time.time() - self._node_profile[node.name].get(
-            "_temp_load_start", time.time()
-        )
+        if self.disable:
+            return
+        now = time.time()
+        key = (threading.get_ident(), dataset_name, node.name)
+        start = self._load_starts.pop(key, now)
+        load_duration = now - start
 
         # Accumulate the duration instead of overwriting
         self._dataset_profile[dataset_name][LOAD_TIME] = (
             self._dataset_profile[dataset_name].get(LOAD_TIME, 0) + load_duration
         )
         self._node_profile[node.name][LOAD_TIME] = (
-            self._node_profile[node.name].get(LOAD_TIME, 0) + node_load_duration
+            self._node_profile[node.name].get(LOAD_TIME, 0) + load_duration
         )
         self._dataset_profile[dataset_name][LOAD_COUNT] = (
             self._dataset_profile[dataset_name].get(LOAD_COUNT, 0) + 1
@@ -246,10 +250,10 @@ class ProfileHook:
             dataset_name: Name of the dataset being saved.
             node: The Kedro node saving the dataset.
         """
-        curr = time.time()
-        # Store start time in a temporary key to avoid overwriting accumulated times
-        self._dataset_profile[dataset_name]["_temp_save_start"] = curr
-        self._node_profile[node.name]["_temp_save_start"] = curr
+        if self.disable:
+            return
+        key = (threading.get_ident(), dataset_name, node.name)
+        self._save_starts[key] = time.time()
 
     @hook_impl
     def after_dataset_saved(self, dataset_name: str, node: Node) -> None:
@@ -259,20 +263,19 @@ class ProfileHook:
             dataset_name: Name of the dataset that was saved.
             node: The Kedro node that saved the dataset.
         """
-        # Calculate elapsed time from temporary start time
-        save_duration = time.time() - self._dataset_profile[dataset_name].get(
-            "_temp_save_start", time.time()
-        )
-        node_save_duration = time.time() - self._node_profile[node.name].get(
-            "_temp_save_start", time.time()
-        )
+        if self.disable:
+            return
+        now = time.time()
+        key = (threading.get_ident(), dataset_name, node.name)
+        start = self._save_starts.pop(key, now)
+        save_duration = now - start
 
         # Accumulate the duration instead of overwriting
         self._dataset_profile[dataset_name][SAVE_TIME] = (
             self._dataset_profile[dataset_name].get(SAVE_TIME, 0) + save_duration
         )
         self._node_profile[node.name][SAVE_TIME] = (
-            self._node_profile[node.name].get(SAVE_TIME, 0) + node_save_duration
+            self._node_profile[node.name].get(SAVE_TIME, 0) + save_duration
         )
         self._dataset_profile[dataset_name][SAVE_COUNT] = (
             self._dataset_profile[dataset_name].get(SAVE_COUNT, 0) + 1
@@ -455,43 +458,40 @@ def print_rich_table_to_console(rich_table: Table) -> None:
     console.print(rich_table)
 
 
-def _build_node_table(
-    dictionary: Mapping[str, dict[str, Any]], index_name: str
+def _build_profile_table(
+    dictionary: Mapping[str, dict[str, Any]],
+    index_name: str,
+    time_cols: list[str],
 ) -> pd.DataFrame:
-    """Build a formatted DataFrame from node profiling data.
-
-    Creates a table showing node execution metrics including loading time,
-    compute time, saving time, and total time. Results are sorted by total
-    time in descending order.
-
-    Args:
-        dictionary: Profiling data collected for each node.
-        index_name: Name to use for the index column (e.g., "Node Name").
-
-    Returns:
-        Formatted DataFrame with node profiling metrics.
-    """
+    """Build a sorted, rounded profiling DataFrame from raw timing metrics."""
     df = pd.DataFrame.from_dict(dict(dictionary), orient="index")
-    # Drop temporary columns used for async timing
     temp_cols = [col for col in df.columns if col.startswith("_temp_")]
     df = df.drop(columns=temp_cols, errors="ignore")
-    # Ensure required columns exist
-    for col in [LOAD_TIME, NODE_RUN_TIME, SAVE_TIME]:
+    for col in time_cols:
         if col not in df.columns:
             df[col] = 0.0
-    # Ensure execution order exists
-    if EXECUTION_ORDER not in df.columns:
-        df[EXECUTION_ORDER] = 0
-    # Add Total time
-    df[TOTAL_TIME] = df[[LOAD_TIME, NODE_RUN_TIME, SAVE_TIME]].sum(axis=1, skipna=True)
-    # Add human-readable total time
+    df[TOTAL_TIME] = df[time_cols].sum(axis=1, skipna=True)
     df["Total Time"] = df[TOTAL_TIME].apply(
         lambda x: humanize.naturaldelta(x, minimum_unit="seconds")
     )
-    df = df.reset_index(names=index_name).sort_values(TOTAL_TIME, ascending=False)
-    # Trim decimal place
-    df = df.round(2)
-    # Convert execution order to int for cleaner display
+    return (
+        df.reset_index(names=index_name)
+        .sort_values(TOTAL_TIME, ascending=False)
+        .round(2)
+    )
+
+
+def _build_node_table(
+    dictionary: Mapping[str, dict[str, Any]], index_name: str
+) -> pd.DataFrame:
+    """Build a formatted DataFrame from node profiling data."""
+    df = _build_profile_table(
+        dictionary=dictionary,
+        index_name=index_name,
+        time_cols=[LOAD_TIME, NODE_RUN_TIME, SAVE_TIME],
+    )
+    if EXECUTION_ORDER not in df.columns:
+        df[EXECUTION_ORDER] = 0
     df[EXECUTION_ORDER] = df[EXECUTION_ORDER].fillna(0).astype(int)
     return df[
         [
@@ -509,37 +509,12 @@ def _build_node_table(
 def _build_dataset_table(
     dictionary: Mapping[str, dict[str, Any]], index_name: str
 ) -> pd.DataFrame:
-    """Build a formatted DataFrame from dataset profiling data.
-
-    Creates a table showing dataset I/O metrics including loading time,
-    saving time, and total time. Results are sorted by total time in
-    descending order.
-
-    Args:
-        dictionary: Profiling data collected for each dataset.
-        index_name: Name to use for the index column (e.g., "Dataset Name").
-
-    Returns:
-        Formatted DataFrame with dataset profiling metrics.
-    """
-    df = pd.DataFrame.from_dict(dict(dictionary), orient="index")
-    # Drop temporary columns used for async timing
-    temp_cols = [col for col in df.columns if col.startswith("_temp_")]
-    df = df.drop(columns=temp_cols, errors="ignore")
-    # Ensure required columns exist
-    for col in [LOAD_TIME, SAVE_TIME]:
-        if col not in df.columns:
-            df[col] = 0.0
-    # Add Total time
-    df[TOTAL_TIME] = df[[LOAD_TIME, SAVE_TIME]].sum(axis=1, skipna=True)
-    # Add human-readable total time
-    df["Total Time"] = df[TOTAL_TIME].apply(
-        lambda x: humanize.naturaldelta(x, minimum_unit="seconds")
+    """Build a formatted DataFrame from dataset profiling data."""
+    df = _build_profile_table(
+        dictionary=dictionary,
+        index_name=index_name,
+        time_cols=[LOAD_TIME, SAVE_TIME],
     )
-    df = df.reset_index(names=index_name).sort_values(TOTAL_TIME, ascending=False)
-    # Trim decimal place
-    df = df.round(2)
-    # Convert count columns to int for cleaner display
     if LOAD_COUNT in df.columns:
         df[LOAD_COUNT] = df[LOAD_COUNT].fillna(0).astype(int)
     if SAVE_COUNT in df.columns:
