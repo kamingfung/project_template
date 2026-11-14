@@ -15,6 +15,10 @@ run *args:
 viz:
     uv run kedro viz run
 
+# Launch Marimo reactive notebook editor
+marimo *args:
+    uv run marimo edit {{args}}
+
 # Internal: print a free TCP port
 _free-port:
     @python3 -c "import socket; s=socket.socket(); s.bind(('',0)); print(s.getsockname()[1]); s.close()"

@@ -30,6 +30,7 @@ dev = [
   "ipython>=8.10",
   "jupyter>=1.1.1",
   "kedro-viz>=12.0",
+  "marimo>=0.25,<1.0",
   "pre-commit>=4.2.0",
   "pytest>=8.0",
   "pytest-cov>=6.0",
@@ -103,6 +104,7 @@ preview = false
 
 [tool.ruff.lint.per-file-ignores]
 "*.ipynb" = ["E402", "F821", "T201"]
+"notebooks/**/*.py" = ["PLC0415"]
 "tests/**/*.py" = ["E402", "PLC0415"]
 ".claude/**/*.py" = ["T201"]
 "src/**/profile_hook.py" = ["T201"]

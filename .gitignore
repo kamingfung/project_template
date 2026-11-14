@@ -11,6 +11,7 @@ notebooks/**
 experiments/**
 !data/**/
 !data/01_raw/*.csv
+!notebooks/explore_fleet.py
 !.gitkeep
 
 # Ignore kedro-viz metadata
