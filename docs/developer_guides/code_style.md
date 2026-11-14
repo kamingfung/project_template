@@ -12,71 +12,112 @@ Stop at the first rung that holds. Only descend when the rung above genuinely do
 4. **Can it be one line?** Write one line.
 5. **Only then:** write the minimum code that works — no scaffolding, no "for later".
 
-If you consciously stop above a full implementation because a simpler form holds for now, leave a plain-words comment naming the limit and the upgrade path:
+If you consciously stop above a full implementation because a simpler form holds for now, leave a plain-words comment naming the limit and the upgrade path (no tag word; mention "deliberate simplification" in the PR description):
 
 ```python
 # Linear scan; fine below ~10k rows. Switch to an index lookup above that.
 match = next((r for r in records if r["id"] == target_id), None)
 ```
 
-## Functional & Pure Style
+## 1. Functional & Pure Style
 
 - **Pure functions:** same inputs produce the same outputs; never mutate arguments or globals in place. Always `.copy()` mutable DataFrames, dicts, or lists before modifying.
-- **Split the decision from the action:** write a pure function that returns a verdict, and a separate function that executes side effects. The decision function is testable without mocks.
-- **Keep functions small:** aim for ~30 body lines or fewer (excluding signature, docstring, comments, and blank lines).
-- **Readable pandas:** break long chains into named intermediate variables with one or two related operations per line.
+- **Avoid `inplace=True`:** return a new object (`df_sorted = df.sort_values("a")`); `inplace` mutates callers and gives no speed benefit in pandas.
+- **Avoid mutable default arguments:** default to `None` and initialize inside the function (`quantiles: list[float] | None = None`).
+- **Split the decision from the action:** write a pure predicate/decision function and a separate function that executes side effects so the decision is unit-testable with a tiny DataFrame and no mocks.
+- **Keep functions small:** aim for ~30 body lines or fewer (excluding signature, docstring, comments, and blank lines; longer is fine with a stated reason).
+- **Readable pandas:** one or two related operations per line; break long chains into named intermediate variables.
 
 ```python
-# Bad — mutates input in place
-def add_ratio(df: pd.DataFrame) -> pd.DataFrame:
-    df["ratio"] = df["num"] / df["den"]
-    return df
+# Bad — mutates input in place and uses mutable default
+def filter_shuttles(df: pd.DataFrame, types: list[str] = ["Type A"]) -> pd.DataFrame:
+    df.dropna(subset=["price"], inplace=True)
+    return df[df["shuttle_type"].isin(types)]
 
 
-# Good — pure, explicit copy
-def add_ratio(df: pd.DataFrame) -> pd.DataFrame:
-    result = df.copy()
-    result["ratio"] = result["num"] / result["den"]
-    return result
+# Good — pure function, safe default
+def filter_shuttles(df: pd.DataFrame, types: list[str] | None = None) -> pd.DataFrame:
+    if types is None:
+        types = ["Type A"]
+    valid = df.dropna(subset=["price"])
+    return valid[valid["shuttle_type"].isin(types)].copy()
 ```
 
-## Readability & Signatures
+## 2. Readability & Signatures
 
-- **Descriptive, pronounceable names:** `current_date` instead of `ymdstr`; `company` instead of `item` in loops.
-- **One concept, one name:** do not alternate between `client`, `customer`, and `account` for the same entity.
-- **Keep signatures small (`≤5` arguments):** group related parameters into a `dict` or dataclass when the list grows.
+- **Descriptive, pronounceable names:** `current_date` instead of `ymdstr`; `company` instead of `item` in loops; `locations` instead of `location_tuple`.
+- **One concept, one name:** do not mix `client`, `customer`, and `account` for the same entity.
+- **All artifacts in American English:** identifiers, docstrings, comments, commit messages, YAML keys, and logs.
+- **Keep signatures small (`≤5` arguments):** group related parameters into a `dict` or dataclass when larger.
 - **Keyword arguments for `>2` arguments:** use keyword arguments in both `src/` and `tests/` so signature reordering cannot silently swap values.
 - **No boolean flag parameters:** split `f(x, flag=True)` into two clearly named functions.
-- **Google-style docstrings:** start on a new line after `"""` and include types in the function signature.
+- **Google-style docstrings:** start the summary on a new line after `"""`, include types in the signature, and list output DataFrame columns in `Returns:` separated by `|`.
 
-## Top-Down Function Ordering
+## 3. Top-Down Function Ordering
 
 Arrange functions so readers encounter callers before callees:
 
-1. Public or entry-point function first (e.g., the Kedro node registered in `pipeline.py`).
-2. Its helpers immediately after, ordered by first appearance in the entry-point body.
-3. Helpers of helpers follow their parent helper.
-4. Shared helpers sit under their first consumer; do not duplicate or repeat them below later callers.
+1. **Node function first** (the public function registered in `pipeline.py`).
+2. **Its helpers immediately after**, ordered by first appearance in the node body.
+3. **Helpers of helpers** follow their parent helper.
+4. **Shared helpers** belong under their first consumer (by `pipeline.py` registration order); do not duplicate or repeat them below later callers.
 
-## Fail Loud & Data Integrity
+## 4. Fail Loud, Guard Clauses & Data Integrity
 
 - **Guard clauses first:** validate preconditions and return or raise at the top so the happy path is never nested.
-- **Strict config reads:** read required config with `params["key"]`, never `.get(key, default)`.
+- **Strict config reads:** read required config with `params["key"]`, never `.get(key, default)` (see [parameters.md](parameters.md)).
 - **Three-tier error handling:**
   1. Anticipated + auto-fixable -> `try`/`except` with a specific exception type (never bare `except`).
-  2. Anticipated + unfixable -> `raise ValueError(...)` naming the dataset, columns, and offending values.
-  3. Expected deviation -> `logger.warning(...)` with entity, window, and row count.
-- **Custom exceptions:** add a subclass only when a caller branches on it.
-- **No silent fallbacks:** avoid `fillna`, `drop(..., errors="ignore")`, `dropna`, truncating `.astype(int)`, inner joins that drop rows, or last-write-wins dedup without counting and logging touched rows.
-- **Validate joins and grouped ops:** pass `validate=...` to `pd.merge` (e.g., `validate="many_to_one"`) and run `ffill`, `bfill`, `shift`, and rolling windows inside `groupby` on entity keys.
+  2. Anticipated + unfixable -> `raise ValueError(...)` naming the dataset, columns wanted, and columns/values present.
+  3. Expected deviation -> `logger.warning(...)` with entity, window, and row count (see [logging.md](logging.md)).
+- **Errors a caller branches on:** use a plain `ValueError` with a clear message when nothing branches on the failure; subclass `ValueError` only when a caller catches that specific failure to recover. Never match on exception message text or pack error codes into `args[0]`.
+- **Own the ingestion boundary:** map external/raw column names to internal names once in the ingestion node; downstream nodes use internal names only.
+- **Model state honestly:** use separate Pandera schemas for raw vs. cleaned data rather than reusing one schema with `nullable=True` columns that are guaranteed non-null after cleaning (see [schema_validation.md](schema_validation.md)).
+- **No silent fallbacks:** avoid `fillna`, `drop(..., errors="ignore")`, `dropna`, truncating `.astype(int)`, inner joins that drop rows, or last-write-wins dedup without counting and logging affected rows.
 - **Empty in, empty out:** return an empty schema-compliant DataFrame (`Schema.empty()`) for empty inputs.
-- **ISO year with ISO week:** pair `isocalendar().week` with `isocalendar().year`, never with calendar year.
 
-## Constants & Performance
+```python
+def weighted_mean_price(
+    df: pd.DataFrame, weight_col: str = "passenger_capacity"
+) -> float:
+    """
+    Compute capacity-weighted mean shuttle price.
 
-- Keep a constant local to its function until a second function reads it; then move it to module top or a constants module annotated `Final`.
-- Use `Enum` for closed sets of values callers must exhaustively handle.
-- Profile before optimizing; prefer vectorized pandas/NumPy operations over `.iterrows()`.
+    Args:
+        df: Shuttle records containing price and weight_col.
+        weight_col: Column carrying positive weights.
+    Returns:
+        float: Weighted mean price, or nan when no scoreable rows exist.
+    Raises:
+        ValueError: Required columns are missing.
+    """
+    missing = {"price", weight_col} - set(df.columns)
+    if missing:
+        raise ValueError(
+            f"weighted_mean_price requires {sorted(missing)}; got {sorted(df.columns)}"
+        )
+    usable = df.dropna(subset=["price", weight_col])
+    if usable.empty:
+        return float("nan")
+    return float(
+        (usable["price"] * usable[weight_col]).sum() / usable[weight_col].sum()
+    )
+```
+
+## 5. Pandas & Time-Series Best Practices
+
+- **Always name `pd.merge()` arguments:** explicitly pass `left`, `right`, `on`, `how`, and `validate` (`"one_to_one"`, `"many_to_one"`).
+- **Sort before `groupby` on floats:** floating-point addition is not associative; sort by grouping + aggregation keys first (`df.sort_values(["group", "val"]).groupby("group")["val"].sum()`) for bitwise reproducibility.
+- **Time operations inside `groupby`:** run `ffill`, `bfill`, `shift`, and rolling windows inside `groupby` on entity keys so values never leak across entities.
+- **Time-based rolling windows:** sort by the timestamp column, set it as index, and use time-based window strings (`f"{n_weeks * 7}D"`) rather than integer row counts (`window=3`), which break when dates are missing.
+- **Avoid `iloc` for temporal slicing:** filter with explicit date comparisons (`df[df["date"] >= cutoff]`) instead of `df.iloc[-3:]`.
+- **Pair ISO week with ISO year:** always pair `isocalendar().week` with `isocalendar().year`, never with calendar `.dt.year`.
+
+## 6. Constants & Scalability
+
+- Keep a constant local to its function until a second function reads it; then move it to module top or a shared constants module annotated `Final` (`MAX_CAPACITY: Final[int] = 1_000`).
+- Use an `Enum` when the set of values is closed and callers must handle every member.
+- Profile before optimizing (use `ProfileHook`); optimize in order: vectorized pandas/NumPy operations -> parallel execution ([parallelism.md](parallelism.md)) -> targeted algorithmic changes. Never iterate row-by-row with `.iterrows()`.
 
 ## Where explanation belongs
 
@@ -92,10 +133,3 @@ When a name alone is not enough, follow the cascade and stop at the first level 
 | Design decisions, parameter semantics, architecture | Yes | `docs/` |
 | Experiment tables, backtest numbers, arm comparisons | No (branch-specific) | `changelogs/` or PR description |
 | Branch rationale that may change before merge | No | `changelogs/` or PR description |
-
-## See also
-
-- [logging.md](logging.md) — logger setup, log levels, 3 a.m. actionability test
-- [unit_test.md](unit_test.md) — test structure, fixtures, Pandera boundaries, mocking rules
-- [visualization.md](visualization.md) — colorblind-safe palettes and diagramming
-- [writing_standards.md](writing_standards.md) — ASD-STE100 prose and documentation structure
