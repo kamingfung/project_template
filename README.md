@@ -44,6 +44,7 @@ Modern data science and analytics project template built on **Kedro**, **MLflow*
 | Command | Purpose |
 | --- | --- |
 | `just init` | Install Python 3.14, sync `uv` dependencies, and install pre-commit hooks |
+| `just plugins` | Symlink `eng-standards` and `mbb-communication-style` plugins into `~/.gemini/config/plugins/` |
 | `just run` | Run the default Kedro pipeline |
 | `just test` | Run unit tests in parallel without coverage |
 | `just test_ci` | Run unit tests with coverage report (90% minimum on node modules) |
@@ -84,7 +85,7 @@ just audit && just lint_check && just typecheck && just test_ci
 ## Folder Structure
 
 ```text
-├── .claude/             # Claude Code rules, skills, and safety settings
+├── .claude/             # Claude Code project safety settings
 ├── conf/
 │   ├── base/            # Catalog, parameters, and globals
 │   ├── local/           # Local overrides (e.g., mlflow.yml)
@@ -97,15 +98,11 @@ just audit && just lint_check && just typecheck && just test_ci
 │   ├── pipeline_registry.py
 │   └── settings.py
 ├── tests/               # Unit tests mirroring src/project_template/
-├── CLAUDE.md            # Entry point describing .claude/ rules and skills
+├── CLAUDE.md            # Project agent notes
 ├── Justfile             # Task runner recipes
 └── pyproject.toml       # Project metadata, dependencies, and tool config
 ```
 
 ## Agent Rules & Skills
 
-Coding, testing, and documentation rules live in `.claude/`:
-
-- Always-on rules (`agent-defaults.md`, `coding-guidelines.md`, `session-handoff.md`) live in `.claude/rules/`.
-- File-scoped rules in `.claude/rules/` use `paths:` front-matter to load only for matching files.
-- On-demand workflows live in `.claude/skills/`.
+Engineering standards, developer guides, and code review skills are packaged in the `eng-standards` agent plugin; structured problem solving, executive presentations, and MBB slide creation skills are packaged in `mbb-communication-style`. Run `just plugins` to link both sibling repos into `~/.gemini/config/plugins/`. Project-specific safety settings remain in `.claude/settings.json`.

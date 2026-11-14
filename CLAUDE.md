@@ -1,7 +1,6 @@
 # project_template
 
-Project conventions and engineering rules live in `.claude/`:
-
-- **Always-on rules** (`.claude/rules/` without `paths:` front-matter): `agent-defaults.md`, `coding-guidelines.md`.
-- **Path-scoped rules** (`.claude/rules/` with `paths:` front-matter): load automatically when reading or editing matching files.
-- **Skills** (`.claude/skills/`): on-demand workflows (`code-reviewer`, `code-review-checklist`, `worktrees`).
+- `.claude/settings.json`: project-level safety settings (commit attribution and `main` force-push protection).
+- Engineering standards, developer guides, and code review skills live in the `eng-standards` agent plugin.
+- Structured problem solving and executive presentation skills live in the `mbb-communication-style` agent plugin.
+- Run `just plugins` to link both sibling plugins into `~/.gemini/config/plugins/`.
