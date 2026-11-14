@@ -13,7 +13,8 @@ def summarize_fleet(
         model_input_table["passenger_capacity"] >= min_passenger_capacity
     ]
     if eligible.empty:
-        mlflow.log_metrics({"eligible_shuttle_count": 0.0})
+        if mlflow.active_run():
+            mlflow.log_metrics({"eligible_shuttle_count": 0.0})
         return pd.DataFrame(
             columns=["shuttle_type", "shuttle_count", "avg_price", "total_capacity"]
         )
@@ -28,10 +29,11 @@ def summarize_fleet(
         .sort_values("shuttle_type")
         .reset_index(drop=True)
     )
-    mlflow.log_metrics(
-        {
-            "eligible_shuttle_count": float(len(eligible)),
-            "mean_shuttle_price": float(eligible["price"].mean()),
-        }
-    )
+    if mlflow.active_run():
+        mlflow.log_metrics(
+            {
+                "eligible_shuttle_count": float(len(eligible)),
+                "mean_shuttle_price": float(eligible["price"].mean()),
+            }
+        )
     return summary
