@@ -52,7 +52,6 @@ Modern data science and analytics project template built on **Kedro**, **MLflow*
 | `just typecheck` | Run static type checking with `ty` |
 | `just audit` | Audit locked dependencies with `pip-audit` |
 | `just viz` | Launch Kedro-Viz |
-| `just marimo` | Launch Marimo reactive notebook editor |
 | `just mlflow-local` | Launch MLflow UI against `sqlite:///mlflow.db` |
 
 ## Updating Packages
