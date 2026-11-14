@@ -25,7 +25,6 @@ def _(mo, pd):
             companies,
         ]
     )
-    return companies, shuttles
 
 
 if __name__ == "__main__":

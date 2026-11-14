@@ -17,7 +17,7 @@ viz:
 
 # Launch Marimo reactive notebook editor
 marimo *args:
-    uv run marimo edit {{args}}
+    uv run marimo edit --no-sandbox {{args}}
 
 # Internal: print a free TCP port
 _free-port:
