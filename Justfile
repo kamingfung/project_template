@@ -63,3 +63,7 @@ check_merge_conflicts:
 # Scan working tree for secrets
 check_secrets:
     gitleaks detect --source . --no-git --exit-code 2
+
+# Audit locked dependencies for known vulnerabilities
+audit:
+    uv export --frozen --no-hashes --no-emit-project | uvx pip-audit -r /dev/stdin --no-deps --disable-pip

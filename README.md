@@ -50,6 +50,7 @@ Modern data science and analytics project template built on **Kedro**, **MLflow*
 | `just lint` | Auto-fix lint issues and format code with `ruff` |
 | `just lint_check` | Verify `ruff` lint/format and stripped notebook outputs |
 | `just typecheck` | Run static type checking with `ty` |
+| `just audit` | Audit locked dependencies with `pip-audit` |
 | `just viz` | Launch Kedro-Viz |
 | `just mlflow-local` | Launch MLflow UI against `sqlite:///mlflow.db` |
 
