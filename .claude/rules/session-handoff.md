@@ -1,7 +1,3 @@
----
-inclusion: always
----
-
 # Session Handoff
 
 When starting a new session or picking up work from another machine/agent:

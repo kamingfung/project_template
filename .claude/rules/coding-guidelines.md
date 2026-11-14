@@ -1,7 +1,3 @@
----
-inclusion: always
----
-
 # Coding Guidelines
 
 Behavioral rules that apply to every interaction. File-specific rules live in

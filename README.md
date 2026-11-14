@@ -1,6 +1,6 @@
 # project_template
 
-Modern data science and analytics project template built on **Kedro**, **MLflow**, **uv**, **just**, **ruff**, **ty**, and **pytest**, with unified **Kiro** and **Claude Code** steering.
+Modern data science and analytics project template built on **Kedro**, **MLflow**, **uv**, **just**, **ruff**, **ty**, and **pytest**, with **Claude Code** rules and skills.
 
 ## Stack
 
@@ -85,8 +85,7 @@ just audit && just lint_check && just typecheck && just test_ci
 ## Folder Structure
 
 ```text
-├── .claude/             # Claude Code rules, skills, hooks, and safety settings
-├── .kiro/steering/      # Single source of truth for agent steering rules
+├── .claude/             # Claude Code rules, skills, and safety settings
 ├── conf/
 │   ├── base/            # Catalog, parameters, and globals
 │   ├── local/           # Local overrides (e.g., mlflow.yml)
@@ -99,15 +98,15 @@ just audit && just lint_check && just typecheck && just test_ci
 │   ├── pipeline_registry.py
 │   └── settings.py
 ├── tests/               # Unit tests mirroring src/project_template/
-├── CLAUDE.md            # Imports always-on steering from .kiro/steering/
+├── CLAUDE.md            # Entry point describing .claude/ rules and skills
 ├── Justfile             # Task runner recipes
 └── pyproject.toml       # Project metadata, dependencies, and tool config
 ```
 
-## Steering & Agent Rules
+## Agent Rules & Skills
 
-Coding, testing, and documentation rules live in `.kiro/steering/` as the single source of truth:
+Coding, testing, and documentation rules live in `.claude/`:
 
-- Always-on rules are imported by `CLAUDE.md`.
-- File-scoped rules are mapped in `.claude/rules/` via `paths:` front-matter.
+- Always-on rules (`agent-defaults.md`, `coding-guidelines.md`, `session-handoff.md`) live in `.claude/rules/`.
+- File-scoped rules in `.claude/rules/` use `paths:` front-matter to load only for matching files.
 - On-demand workflows live in `.claude/skills/`.

@@ -1,6 +1,6 @@
 ---
 name: worktrees
-description: Use when creating, listing, or removing git worktrees for this repo.
+description: Use when creating, using, or cleaning up git worktrees.
 ---
 
-Read `.kiro/steering/worktrees.md` from the repo root and follow it. Where it includes another file with `#[[file:<path>]]`, read that path from the repo root too.
+# Worktrees

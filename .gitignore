@@ -107,10 +107,8 @@ out/
 .*.swo
 .*.swp
 
-# Claude & Kiro local state
+# Claude local state
 .claude/*
 !.claude/settings.json
 !.claude/rules/
 !.claude/skills/
-!.claude/hooks/
-.kiro/worktrees/
