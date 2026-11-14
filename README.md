@@ -7,6 +7,7 @@ Modern data science and analytics project template built on **Kedro**, **MLflow*
 - **Environment & packaging:** `uv` (Python 3.14)
 - **Task runner:** `just` (`Justfile`)
 - **Pipeline framework:** `kedro` + `kedro-datasets` + `kedro-viz`
+- **Data contracts & compute:** `pandera` (schema validation), `ray` (multiprocessing)
 - **Experiment tracking:** `mlflow` + `kedro-mlflow` (local SQLite backend by default)
 - **Code quality:** `ruff` (lint + format), `ty` (type check), `pre-commit`
 - **Testing:** `pytest` with `pytest-cov`, `pytest-xdist`, `pytest-sugar`, and `pytest-mock`

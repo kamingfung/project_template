@@ -15,7 +15,9 @@ dependencies = [
   "kedro-mlflow>=2.0,<3.0",
   "mlflow>=3.0,<4.0",
   "pandas>=2.2,<4.0",
+  "pandera>=0.30.1,<0.31",
   "pyarrow>=19.0,<25.0",
+  "ray>=2.60,<3.0",
 ]
 
 [project.scripts]

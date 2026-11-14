@@ -2,6 +2,8 @@
 
 import pandas as pd
 
+from project_template.pipelines.data_processing.schemas import MODEL_INPUT_SCHEMA
+
 
 def preprocess_companies(companies: pd.DataFrame) -> pd.DataFrame:
     """Parse boolean flags and percentage ratings in raw company records."""
@@ -32,7 +34,8 @@ def create_model_input_table(
         right_on="id",
         suffixes=("_shuttle", "_company"),
     )
-    return merged.rename(columns={"id_shuttle": "shuttle_id"})
+    result = merged.rename(columns={"id_shuttle": "shuttle_id"})
+    return MODEL_INPUT_SCHEMA.validate(result)
 
 
 def _is_true(series: pd.Series) -> pd.Series:

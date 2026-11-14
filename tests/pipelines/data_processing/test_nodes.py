@@ -1,6 +1,7 @@
 """Unit tests for data_processing nodes."""
 
 import pandas as pd
+import pandera.errors
 import pytest
 
 from project_template.pipelines.data_processing.nodes import (
@@ -72,3 +73,19 @@ def test_create_model_input_table_joins_and_drops_missing_ratings(
     assert len(result) == 2
     assert set(result["shuttle_id"].tolist()) == {101, 102}
     assert result["company_rating"].isna().sum() == 0
+
+
+def test_create_model_input_table_rejects_negative_price(
+    sample_companies: pd.DataFrame,
+    sample_shuttles: pd.DataFrame,
+) -> None:
+    """Schema validation fails loudly when price is negative."""
+    companies_clean = preprocess_companies(companies=sample_companies)
+    shuttles_clean = preprocess_shuttles(shuttles=sample_shuttles)
+    shuttles_clean.loc[0, "price"] = -10.0
+
+    with pytest.raises(pandera.errors.SchemaError):
+        create_model_input_table(
+            shuttles=shuttles_clean,
+            companies=companies_clean,
+        )
