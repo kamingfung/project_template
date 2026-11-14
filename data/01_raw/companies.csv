@@ -1,0 +1,6 @@
+id,company_rating,company_location,total_fleet_count,iata_approved
+1,95%,USA,12,t
+2,88%,Canada,6,t
+3,72%,UK,3,f
+4,,Germany,4,t
+5,91%,Japan,9,t

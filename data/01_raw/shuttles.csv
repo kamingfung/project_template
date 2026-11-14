@@ -1,0 +1,7 @@
+id,shuttle_location,shuttle_type,engine_type,engine_vendor,engines,passenger_capacity,cancellation_policy,crew,d_check_complete,moon_clearance_complete,price,company_id
+101,USA,Type V5,Quantum,OrbitalTech,2,4,strict,2,t,f,"$1,200.00",1
+102,USA,Type F5,Plasma,OrbitalTech,4,8,flexible,3,t,t,"$2,500.50",1
+103,Canada,Type V5,Quantum,AeroSpace,2,6,moderate,2,f,f,"$1,800.00",2
+104,UK,Type A2,Ion,AeroSpace,1,1,strict,1,t,f,"$750.00",3
+105,Germany,Type F5,Plasma,EuroThrust,4,10,flexible,4,t,t,"$3,100.00",4
+106,Japan,Type V5,Quantum,NipponProp,2,5,moderate,2,t,t,"$1,950.00",5
