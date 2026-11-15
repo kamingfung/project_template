@@ -105,4 +105,4 @@ just audit && just lint_check && just typecheck && just test_ci
 
 ## Agent Rules & Skills
 
-Engineering standards, MBB problem solving/slide creation, and HK sharp execution skills are packaged in the `data-scientist` agent plugin. Run `just plugins` to link it from the sibling repo into `~/.gemini/config/plugins/`. Project-specific safety settings remain in `.claude/settings.json`.
+Engineering standards, structured problem solving, and consulting-style communication skills are packaged in the `data-scientist` agent plugin. Run `just plugins` to link it from the sibling repo into `~/.gemini/config/plugins/`. Project-specific safety settings remain in `.claude/settings.json`.
