@@ -7,23 +7,21 @@ init:
     uv sync --all-groups
     uv run pre-commit install
 
-# Symlink local agent plugins (eng-standards, mbb-communication-style) into ~/.gemini/config/plugins
+# Symlink local agent plugin (data-scientist) into ~/.gemini/config/plugins
 plugins:
     #!/usr/bin/env sh
     set -e
     mkdir -p "$HOME/.gemini/config/plugins"
     parent_dir=$(dirname "{{project}}")
-    for plugin in eng-standards mbb-communication-style; do
-        src="$parent_dir/$plugin"
-        dest="$HOME/.gemini/config/plugins/$plugin"
-        if [ -d "$src" ]; then
-            ln -sfn "$src" "$dest"
-            echo "Linked $plugin -> $dest"
-        else
-            echo "Missing $src; clone $plugin next to {{project}} or install via Plugins Manager." >&2
-            exit 1
-        fi
-    done
+    src="$parent_dir/data-scientist"
+    dest="$HOME/.gemini/config/plugins/data-scientist"
+    if [ -d "$src" ]; then
+        ln -sfn "$src" "$dest"
+        echo "Linked data-scientist -> $dest"
+    else
+        echo "Missing $src; clone data-scientist next to {{project}} or install via Plugins Manager." >&2
+        exit 1
+    fi
 
 # Run Kedro pipeline
 run *args:

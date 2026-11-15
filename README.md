@@ -44,7 +44,7 @@ Modern data science and analytics project template built on **Kedro**, **MLflow*
 | Command | Purpose |
 | --- | --- |
 | `just init` | Install Python 3.14, sync `uv` dependencies, and install pre-commit hooks |
-| `just plugins` | Symlink `eng-standards` and `mbb-communication-style` plugins into `~/.gemini/config/plugins/` |
+| `just plugins` | Symlink the `data-scientist` plugin into `~/.gemini/config/plugins/` |
 | `just run` | Run the default Kedro pipeline |
 | `just test` | Run unit tests in parallel without coverage |
 | `just test_ci` | Run unit tests with coverage report (90% minimum on node modules) |
@@ -105,4 +105,4 @@ just audit && just lint_check && just typecheck && just test_ci
 
 ## Agent Rules & Skills
 
-Engineering standards, developer guides, and code review skills are packaged in the `eng-standards` agent plugin; structured problem solving, executive presentations, and MBB slide creation skills are packaged in `mbb-communication-style`. Run `just plugins` to link both sibling repos into `~/.gemini/config/plugins/`. Project-specific safety settings remain in `.claude/settings.json`.
+Engineering standards, MBB problem solving/slide creation, and HK sharp execution skills are packaged in the `data-scientist` agent plugin. Run `just plugins` to link it from the sibling repo into `~/.gemini/config/plugins/`. Project-specific safety settings remain in `.claude/settings.json`.
