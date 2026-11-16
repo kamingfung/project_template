@@ -45,6 +45,7 @@ Modern data science and analytics project template built on **Kedro**, **MLflow*
 | --- | --- |
 | `just init` | Install Python 3.14, sync `uv` dependencies, and install pre-commit hooks |
 | `just plugins` | Symlink the `data-scientist` plugin into `~/.gemini/config/plugins/` |
+| `just reset-example` | Remove sample spaceflights data, pipelines, tests, and config to start fresh |
 | `just run` | Run the default Kedro pipeline |
 | `just test` | Run unit tests in parallel without coverage |
 | `just test_ci` | Run unit tests with coverage report (90% minimum on node modules) |
@@ -106,3 +107,9 @@ just audit && just lint_check && just typecheck && just test_ci
 ## Agent Rules & Skills
 
 Engineering standards, structured problem solving, and consulting-style communication skills are packaged in the `data-scientist` agent plugin. Run `just plugins` to link it from the sibling repo into `~/.gemini/config/plugins/`. Project-specific safety settings remain in `.claude/settings.json`.
+
+## Starting a New Project
+
+After cloning or creating a repository from this template, run `just reset-example` to strip the sample spaceflights data, pipelines, tests, and config while preserving `.gitkeep` placeholders and quality gates.
+
+The tooling baseline (`uv`, `ruff`, `ty`, `pytest`, `pandera`, `mlflow`, `Justfile`) is independent of the pipeline layer. Kedro is the default here; to use another orchestrator (such as Dagster, Prefect, or plain Python), replace `src/`, `conf/`, and the `run`/`viz` recipes in `Justfile`.

@@ -23,6 +23,27 @@ plugins:
         exit 1
     fi
 
+# Remove sample spaceflights data, pipelines, tests, and config to start fresh
+reset-example:
+    #!/usr/bin/env sh
+    set -e
+    rm -f \
+        data/01_raw/companies.csv \
+        data/01_raw/shuttles.csv \
+        data/02_intermediate/preprocessed_companies.pq \
+        data/02_intermediate/preprocessed_shuttles.pq \
+        data/03_primary/model_input_table.pq \
+        data/08_reporting/fleet_summary.csv
+    rm -rf \
+        src/project_template/pipelines/data_processing \
+        src/project_template/pipelines/reporting \
+        tests/pipelines/data_processing \
+        tests/pipelines/reporting
+    printf '# Add Kedro datasets here.\n{}\n' > conf/base/catalog.yml
+    printf '# Add pipeline parameters here.\n{}\n' > conf/base/parameters.yml
+    printf '"""Shared pytest fixtures for project_template tests."""\n' > tests/conftest.py
+    echo "Example data, pipelines, tests, and config removed."
+
 # Run Kedro pipeline
 run *args:
     uv run kedro run {{args}}
