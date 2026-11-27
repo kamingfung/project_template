@@ -1,36 +1,4 @@
 ##########################
-# KEDRO PROJECT
-
-# Ignore potentially sensitive credentials files
-conf/**/*credentials*
-**/credentials.yml
-
-# Ignore data and notebooks by default, keeping folder structure and sample raw inputs
-data/**
-notebooks/**
-experiments/**
-!data/**/
-!data/01_raw/*.csv
-!.gitkeep
-
-# Ignore kedro-viz metadata
-.viz/
-
-# Ignore file-based logs and profiling outputs
-*.log
-*.log.*
-profiling/*
-!profiling/.gitkeep
-
-##########################
-# MLFLOW
-
-mlruns/
-mlartifacts/
-mlflow.db
-mlflow.db-*
-
-##########################
 # PYTHON & TOOLING
 
 __pycache__/
@@ -105,9 +73,3 @@ out/
 *~
 .*.swo
 .*.swp
-
-# Claude local state
-.claude/*
-!.claude/settings.json
-!.claude/rules/
-!.claude/skills/
