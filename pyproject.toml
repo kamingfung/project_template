@@ -5,30 +5,15 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "project_template"
 version = "0.1.0"
-description = "Modern Kedro + MLflow + uv project template"
+description = "Stack-agnostic Python project template (uv, just, ruff, ty, pytest)"
 readme = "README.md"
 requires-python = ">=3.14,<3.15"
-dependencies = [
-  "kedro[jupyter]>=1.0,<2.0",
-  "kedro-datasets[pandas]>=9.0,<10.0",
-  "kedro-mlflow>=2.0,<3.0",
-  "mlflow>=3.0,<4.0",
-  "pandas>=2.2,<4.0",
-  "pandera>=0.30.1,<0.31",
-  "pyarrow>=19.0,<25.0",
-]
-
-[project.scripts]
-"project-template" = "project_template.__main__:main"
-
-[project.entry-points."kedro.hooks"]
+dependencies = []
 
 [dependency-groups]
 dev = [
   "ipython>=8.10",
   "jupyter>=1.1.1",
-  "kedro-viz>=12.0",
-  "marimo>=0.25.2",
   "pre-commit>=4.2.0",
   "pytest>=8.0",
   "pytest-cov>=6.0",
@@ -43,14 +28,6 @@ dev = [
 where = ["src"]
 namespaces = false
 
-[tool.kedro]
-package_name = "project_template"
-project_name = "project_template"
-kedro_init_version = "1.0.0"
-tools = "['Linting', 'Testing', 'Custom Logging', 'Data Structure', 'Kedro Viz']"
-example_pipeline = "True"
-source_dir = "src"
-
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 addopts = """
@@ -58,15 +35,6 @@ addopts = """
 -n auto \
 --import-mode=importlib \
 """
-
-[tool.coverage.run]
-omit = [
-  "src/**/pipeline*.py",
-  "src/**/__init__.py",
-  "src/**/__main__.py",
-  "src/**/settings.py",
-  "src/**/hooks.py",
-]
 
 [tool.coverage.report]
 fail_under = 90
@@ -103,8 +71,3 @@ preview = false
 [tool.ruff.lint.per-file-ignores]
 "*.ipynb" = ["E402", "F821", "T201"]
 "tests/**/*.py" = ["E402", "PLC0415"]
-".claude/**/*.py" = ["T201"]
-"src/**/profile_hook.py" = ["T201"]
-
-[tool.kedro_telemetry]
-project_id = "c9c39854391541eb964fec532e1f7b4d"
